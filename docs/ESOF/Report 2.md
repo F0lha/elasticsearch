@@ -2,9 +2,22 @@ ESOF - Second Report
 ====================
 Elasticsearch is a distributed search engine and data storage system based on Apache Lucene.
 
+<a name="index"/>
+## Menu
+1. [Requirements](#requirements)
+  1. [Functional Requirements](#functional_requirements)
+  2. [Non-Functional Requirements](#non_functional_requirements)
+  3. [Validation of Requirements](#validation_of_requirements)
+2. [Use Cases](#use_cases)
+3. [Domain Model](#domain_model)
+4. [Definitions, Acronyms and Abbreviations](#def)
+5. [Sources](#sources)
+
+
+<a name="requirements"/>
 Requirements
 ------------
-s
+<a name="functional_requirements"/>
 Functional Requirements:
 * Data Storage - the system must be able to store the information to be retrieved and searched
 * Distributed - storing the various documents comprising the data in multiple machines offers a wide variety of benefits, the system must be able to manage the various nodes
@@ -17,7 +30,7 @@ Functional Requirements:
 * *Did-you-mean* and *More-like-this* suggestions - these kinds of suggestions enable the users of an application to be redirected to other data they might be interested in
 * RESTful API - a familiar and cross-language API allows for developers to quickly and easily start developing their applications
 * Discovery - connected nodes should be able to automatically discover each other
-
+<a name="non_functional_requirements"/>
 Non-Functional Requirements
 * High Availability - the system must endure the inevitable failures in the potentially many nodes that host the data and continue being operational
 * High Throughput/Real Time Performance - fast response times and overall efficiency are highly valued, especially in highly saturated services/applications
@@ -25,7 +38,7 @@ Non-Functional Requirements
 * Reliability - the data in the system must be kept through failures in the nodes that host the data
 * Developer Friendliness - developers unfamiliar with distributed NoSQL systems or search engines such as Lucene must be able to quickly get up and running
 * High Horizontal Scalability - the system must elegantly support the heavy load inherent in large-scale applications involving massive amounts of information
-
+<a name="validation_of_requirements"/>
 Validation of Requirements
 --------------------------
 Since its inception, the project has admirably met its myriad requirements, which have been repeatedly tested and verified by its many users, the principal stakeholders in the project, both in production and in its testing suite.
@@ -39,16 +52,16 @@ Scalable read performance is also assured by the redundancy in the data, allowin
 Scalable write performance, on the other hand, is ensured by the deployment of more machines as nodes.
 
 Developers around the world, from any programming background, find jumping into Elasticsearch easy and manageable. Seasoned ones, on the other hand, make full use of its scalalabity and breadth, in applications both massive and small.
-
+<a name="use_cases"/>
 Use Cases
 ---------
 ![Developer Use Cases](images/use_case_1.PNG "Developer Use Cases")
 ![User Use Cases](images/use_case_2.PNG "User Use Cases")
-
+<a name="domain_model"/>
 Domain Model
 ------------
 ![Elasticsearch domain model](images/domain_model.PNG "Elasticsearch domain model")
-
+<a name="def"/>
 Definitions, Acronyms and Abbreviations
 ---------------------------------------
 * Cluster - A cluster consists of one or more nodes which share the same cluster name. Each cluster has a single master node which is chosen automatically by the cluster and which can be replaced if the current master node fails.
@@ -65,7 +78,7 @@ Definitions, Acronyms and Abbreviations
 
 * Shard - A shard is a single Lucene instance. It is a low-level “worker” unit which is managed automatically by elasticsearch. An index is a logical namespace which points to primary and replica shards. Other than defining the number of primary and replica shards that an index should have, it is never needed to refer to shards directly. Instead, the code should deal only with an index. Elasticsearch distributes shards amongst all nodes in the cluster, and can move shards automatically from one node to another in the case of node failure, or the addition of new nodes.
 
-
+<a name="sources"/>
 Sources
 -------
 * https://www.elastic.co/guide/en/elasticsearch/reference/current/glossary.html
