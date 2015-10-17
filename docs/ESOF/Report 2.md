@@ -2,7 +2,9 @@ ESOF - Second Report
 ====================
 Elasticsearch is a distributed search engine and data storage system based on Apache Lucene.
 
-
+Requirements
+------------
+s
 Functional Requirements:
 * Data Storage - the system must be able to store the information to be retrieved and searched
 * Distributed - storing the various documents comprising the data in multiple machines offers a wide variety of benefits, the system must be able to manage the various nodes
