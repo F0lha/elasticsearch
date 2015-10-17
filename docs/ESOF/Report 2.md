@@ -18,6 +18,7 @@ Elasticsearch is a distributed search engine and data storage system based on Ap
 Requirements
 ------------
 <a name="functional_requirements"/>
+
 Functional Requirements:
 * Data Storage - the system must be able to store the information to be retrieved and searched
 * Distributed - storing the various documents comprising the data in multiple machines offers a wide variety of benefits, the system must be able to manage the various nodes
@@ -31,6 +32,7 @@ Functional Requirements:
 * RESTful API - a familiar and cross-language API allows for developers to quickly and easily start developing their applications
 * Discovery - connected nodes should be able to automatically discover each other
 <a name="non_functional_requirements"/>
+
 Non-Functional Requirements
 * High Availability - the system must endure the inevitable failures in the potentially many nodes that host the data and continue being operational
 * High Throughput/Real Time Performance - fast response times and overall efficiency are highly valued, especially in highly saturated services/applications
@@ -39,6 +41,7 @@ Non-Functional Requirements
 * Developer Friendliness - developers unfamiliar with distributed NoSQL systems or search engines such as Lucene must be able to quickly get up and running
 * High Horizontal Scalability - the system must elegantly support the heavy load inherent in large-scale applications involving massive amounts of information
 <a name="validation_of_requirements"/>
+
 Validation of Requirements
 --------------------------
 Since its inception, the project has admirably met its myriad requirements, which have been repeatedly tested and verified by its many users, the principal stakeholders in the project, both in production and in its testing suite.
