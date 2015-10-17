@@ -34,7 +34,9 @@ Both the growing need for high throughput and the need for reliability are fulfi
 
 Scalable read performance is also assured by the redundancy in the data, allowing for the mass parallelization of read operations.
 
-Scalable write performance, on the other hand, is ensured by the deployment of more machines as nodes. 
+Scalable write performance, on the other hand, is ensured by the deployment of more machines as nodes.
+
+Developers around the world, from any programming background, find jumping into Elasticsearch easy and manageable. Seasoned ones, on the other hand, make full use of its scalalabity and breadth, in applications both massive and small.
 
 Use Cases
 ---------
