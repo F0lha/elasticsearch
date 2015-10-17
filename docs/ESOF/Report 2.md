@@ -28,10 +28,13 @@ Validation of Requirements
 --------------------------
 Since its inception, the project has admirably met its myriad requirements, which have been repeatedly tested and verified by its many users, the principal stakeholders in the project, both in production and in its testing suite.
 
-
-Its nature as a distributed search engine and data storage system requires as a main feature that the various shards that comprise the document be distributed between various machines or nodes. Its touted high availability necessitates that the various shards be constantly communicating with each other, ready to appropriately respond to a variety of failures in the different nodes.
+Its nature as a distributed search engine and data storage system requires as a main feature that the various shards that comprise the documents be distributed between various machines or nodes and that the system itself be able to appropriately manage them. Its touted high availability necessitates that the various shards be constantly communicating with each other, ready to appropriately respond to a variety of failures in the different nodes.
 
 Both the growing need for high throughput and the need for reliability are fulfilled by the redundancy in the replicated shards housed in the nodes.
+
+Scalable read performance is also assured by the redundancy in the data, allowing for the mass parallelization of read operations.
+
+Scalable write performance, on the other hand, is ensured by the deployment of more machines as nodes. 
 
 Use Cases
 ---------
