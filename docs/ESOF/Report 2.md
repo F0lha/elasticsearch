@@ -4,14 +4,52 @@ Elasticsearch is a distributed search engine and data storage system based on Ap
 
 <a name="index"/>
 ## Menu
-1. [Requirements](#requirements)
+1. [Purpose](#purpose)
+2. [Scope](#scope)
+3. [Definitions, Acronyms and Abbreviations](#def)
+4. [Sources](#sources)
+5. [Requirements](#requirements)
   1. [Functional Requirements](#functional_requirements)
   2. [Non-Functional Requirements](#non_functional_requirements)
   3. [Validation of Requirements](#validation_of_requirements)
-2. [Use Cases](#use_cases)
-3. [Domain Model](#domain_model)
-4. [Definitions, Acronyms and Abbreviations](#def)
-5. [Sources](#sources)
+6. [Use Cases](#use_cases)
+7. [Domain Model](#domain_model) 
+8. 
+
+
+<a name="purpose" />
+Purpose
+-------
+The purpose of this report is to explain to both developers and stakeholders what Elastic Search is. It will expose its purpose and its functionalities.
+
+<a name="scope" />
+Scope
+-----
+Elasticsearch is a distributed, document-oriented search server based on the open-source information retrieval library Lucene. It's currently the second most used search engine only behind Apache Solr, another search platform based on Lucene.
+It employs a development model similar to other open source projects, in which a large number of motivated developers all over the world contribute on the features they want implemented. As such, there is no clear precedence in the various tasks that are undertaken, resulting in a great degree of concurrency in the project, thus diverging greatly from the waterfall model. 
+
+
+<a name="def"/>
+Definitions, Acronyms and Abbreviations
+---------------------------------------
+* Cluster - A cluster consists of one or more nodes which share the same cluster name. Each cluster has a single master node which is chosen automatically by the cluster and which can be replaced if the current master node fails.
+
+* Document - A document is a JSON document which is stored in elasticsearch. It is like a row in a table in a relational database. Each document is stored in an index and has a type and an id. A document is a JSON object which contains zero or more fields, or key-value pairs. The original JSON document that is indexed will be stored in the _source field, which is returned by default when getting or searching for a document.
+
+* Node - A node is a running instance of elasticsearch which belongs to a cluster. Multiple nodes can be started on a single server for testing purposes, but usually there should be one node per server. At startup, a node will use unicast (or multicast, if specified) to discover an existing cluster with the same cluster name and will try to join that cluster.
+
+* Primary Shard - Each document is stored in a single primary shard. When you index a document, it is indexed first on the primary shard, then on all replicas of the primary shard. By default, an index has 5 primary shards. You can specify fewer or more primary shards to scale the number of documents that your index can handle. You cannot change the number of primary shards in an index, once the index is created.
+
+* Replica Shard - Each primary shard can have zero or more replicas. A replica is a copy of the primary shard, and has two purposes:
+				1. increase failover: a replica shard can be promoted to a primary shard if the primary fails
+				2. increase performance: get and search requests can be handled by primary or replica shards. By default, each primary shard has one replica, but the number of replicas can be changed dynamically on an existing index. A replica shard will never be started on the same node as its primary shard. 
+
+* Shard - A shard is a single Lucene instance. It is a low-level “worker” unit which is managed automatically by elasticsearch. An index is a logical namespace which points to primary and replica shards. Other than defining the number of primary and replica shards that an index should have, it is never needed to refer to shards directly. Instead, the code should deal only with an index. Elasticsearch distributes shards amongst all nodes in the cluster, and can move shards automatically from one node to another in the case of node failure, or the addition of new nodes.
+
+<a name="sources"/>
+Sources
+-------
+* https://www.elastic.co/guide/en/elasticsearch/reference/current/glossary.html
 
 
 <a name="requirements"/>
@@ -64,24 +102,6 @@ Use Cases
 Domain Model
 ------------
 ![Elasticsearch domain model](images/domain_model.PNG "Elasticsearch domain model")
-<a name="def"/>
-Definitions, Acronyms and Abbreviations
----------------------------------------
-* Cluster - A cluster consists of one or more nodes which share the same cluster name. Each cluster has a single master node which is chosen automatically by the cluster and which can be replaced if the current master node fails.
 
-* Document - A document is a JSON document which is stored in elasticsearch. It is like a row in a table in a relational database. Each document is stored in an index and has a type and an id. A document is a JSON object which contains zero or more fields, or key-value pairs. The original JSON document that is indexed will be stored in the _source field, which is returned by default when getting or searching for a document.
 
-* Node - A node is a running instance of elasticsearch which belongs to a cluster. Multiple nodes can be started on a single server for testing purposes, but usually there should be one node per server. At startup, a node will use unicast (or multicast, if specified) to discover an existing cluster with the same cluster name and will try to join that cluster.
 
-* Primary Shard - Each document is stored in a single primary shard. When you index a document, it is indexed first on the primary shard, then on all replicas of the primary shard. By default, an index has 5 primary shards. You can specify fewer or more primary shards to scale the number of documents that your index can handle. You cannot change the number of primary shards in an index, once the index is created.
-
-* Replica Shard - Each primary shard can have zero or more replicas. A replica is a copy of the primary shard, and has two purposes:
-				1. increase failover: a replica shard can be promoted to a primary shard if the primary fails
-				2. increase performance: get and search requests can be handled by primary or replica shards. By default, each primary shard has one replica, but the number of replicas can be changed dynamically on an existing index. A replica shard will never be started on the same node as its primary shard. 
-
-* Shard - A shard is a single Lucene instance. It is a low-level “worker” unit which is managed automatically by elasticsearch. An index is a logical namespace which points to primary and replica shards. Other than defining the number of primary and replica shards that an index should have, it is never needed to refer to shards directly. Instead, the code should deal only with an index. Elasticsearch distributes shards amongst all nodes in the cluster, and can move shards automatically from one node to another in the case of node failure, or the addition of new nodes.
-
-<a name="sources"/>
-Sources
--------
-* https://www.elastic.co/guide/en/elasticsearch/reference/current/glossary.html
