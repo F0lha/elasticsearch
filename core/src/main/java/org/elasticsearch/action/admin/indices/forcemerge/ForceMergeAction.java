@@ -17,31 +17,29 @@
  * under the License.
  */
 
-package org.elasticsearch.action.count;
+package org.elasticsearch.action.admin.indices.forcemerge;
 
 import org.elasticsearch.action.Action;
 import org.elasticsearch.client.ElasticsearchClient;
 
 /**
- * Action that shortcuts to the search api with size set to 0. It doesn't have a corresponding
- * transport action, it just runs the search api internally.
  */
-public class CountAction extends Action<CountRequest, CountResponse, CountRequestBuilder> {
+public class ForceMergeAction extends Action<ForceMergeRequest, ForceMergeResponse, ForceMergeRequestBuilder> {
 
-    public static final CountAction INSTANCE = new CountAction();
-    public static final String NAME = "indices:data/read/count";
+    public static final ForceMergeAction INSTANCE = new ForceMergeAction();
+    public static final String NAME = "indices:admin/forcemerge";
 
-    private CountAction() {
+    private ForceMergeAction() {
         super(NAME);
     }
 
     @Override
-    public CountResponse newResponse() {
-        throw new UnsupportedOperationException("CountAction doesn't have its own transport action, gets executed as a SearchAction internally");
+    public ForceMergeResponse newResponse() {
+        return new ForceMergeResponse();
     }
 
     @Override
-    public CountRequestBuilder newRequestBuilder(ElasticsearchClient client) {
-        return new CountRequestBuilder(client, this);
+    public ForceMergeRequestBuilder newRequestBuilder(ElasticsearchClient client) {
+        return new ForceMergeRequestBuilder(client, this);
     }
 }

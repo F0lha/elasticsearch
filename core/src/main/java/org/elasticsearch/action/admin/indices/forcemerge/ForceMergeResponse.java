@@ -17,7 +17,25 @@
  * under the License.
  */
 
+package org.elasticsearch.action.admin.indices.forcemerge;
+
+import org.elasticsearch.action.ShardOperationFailedException;
+import org.elasticsearch.action.support.broadcast.BroadcastResponse;
+import org.elasticsearch.common.io.stream.StreamInput;
+import org.elasticsearch.common.io.stream.StreamOutput;
+
+import java.io.IOException;
+import java.util.List;
+
 /**
- * Count action.
+ * A response for force merge action.
  */
-package org.elasticsearch.action.count;
+public class ForceMergeResponse extends BroadcastResponse {
+
+    ForceMergeResponse() {
+    }
+
+    ForceMergeResponse(int totalShards, int successfulShards, int failedShards, List<ShardOperationFailedException> shardFailures) {
+        super(totalShards, successfulShards, failedShards, shardFailures);
+    }
+}

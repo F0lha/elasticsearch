@@ -17,29 +17,7 @@
  * under the License.
  */
 
-package org.elasticsearch.action.admin.indices.optimize;
-
-import org.elasticsearch.action.Action;
-import org.elasticsearch.client.ElasticsearchClient;
-
 /**
+ * Force merge index/indices action.
  */
-public class OptimizeAction extends Action<OptimizeRequest, OptimizeResponse, OptimizeRequestBuilder> {
-
-    public static final OptimizeAction INSTANCE = new OptimizeAction();
-    public static final String NAME = "indices:admin/optimize";
-
-    private OptimizeAction() {
-        super(NAME);
-    }
-
-    @Override
-    public OptimizeResponse newResponse() {
-        return new OptimizeResponse();
-    }
-
-    @Override
-    public OptimizeRequestBuilder newRequestBuilder(ElasticsearchClient client) {
-        return new OptimizeRequestBuilder(client, this);
-    }
-}
+package org.elasticsearch.action.admin.indices.forcemerge;
