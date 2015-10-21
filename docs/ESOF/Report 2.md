@@ -13,8 +13,7 @@ Elasticsearch is a distributed search engine and data storage system based on Ap
   2. [Non-Functional Requirements](#non_functional_requirements)
   3. [Validation of Requirements](#validation_of_requirements)
 6. [Use Cases](#use_cases)
-7. [Domain Model](#domain_model) 
-8. 
+7. [Domain Model](#domain_model)
 
 
 <a name="purpose" />
