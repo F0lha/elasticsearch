@@ -58,14 +58,13 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.env.EnvironmentModule;
 import org.elasticsearch.index.Index;
-import org.elasticsearch.index.IndexNameModule;
+import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AnalysisModule;
 import org.elasticsearch.index.cache.IndexCacheModule;
 import org.elasticsearch.index.mapper.MapperService;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionParser;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionParserMapper;
 import org.elasticsearch.index.query.support.QueryParsers;
-import org.elasticsearch.index.settings.IndexSettingsModule;
 import org.elasticsearch.index.similarity.SimilarityModule;
 import org.elasticsearch.indices.IndicesModule;
 import org.elasticsearch.indices.analysis.IndicesAnalysisService;
@@ -80,6 +79,7 @@ import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.script.mustache.MustacheScriptEngineService;
 import org.elasticsearch.search.internal.SearchContext;
 import org.elasticsearch.test.ESTestCase;
+import org.elasticsearch.test.IndexSettingsModule;
 import org.elasticsearch.test.TestSearchContext;
 import org.elasticsearch.test.VersionUtils;
 import org.elasticsearch.test.cluster.TestClusterService;
@@ -91,7 +91,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -174,7 +173,7 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
                 new EnvironmentModule(new Environment(settings)),
                 new SettingsModule(settings),
                 new ThreadPoolModule(new ThreadPool(settings)),
-                new IndicesModule(settings) {
+                new IndicesModule() {
                     @Override
                     public void configure() {
                         // skip services
@@ -216,8 +215,7 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
                 new IndexSettingsModule(index, indexSettings),
                 new IndexCacheModule(indexSettings),
                 new AnalysisModule(indexSettings, new IndicesAnalysisService(indexSettings)),
-                new SimilarityModule(index, indexSettings),
-                new IndexNameModule(index),
+                new SimilarityModule(IndexSettingsModule.newIndexSettings(index, indexSettings, Collections.EMPTY_LIST)),
         new AbstractModule() {
                     @Override
                     protected void configure() {
@@ -310,7 +308,6 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
      * Generic test that creates new query from the test query and checks both for equality
      * and asserts equality on the two queries.
      */
-    @Test
     public void testFromXContent() throws IOException {
         QB testQuery = createTestQueryBuilder();
         assertParsedQuery(testQuery.toString(), testQuery);
@@ -366,7 +363,6 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
      * Test creates the {@link Query} from the {@link QueryBuilder} under test and delegates the
      * assertions being made on the result to the implementing subclass.
      */
-    @Test
     public void testToQuery() throws IOException {
         QueryShardContext context = createShardContext();
         context.setAllowUnmappedFields(true);
@@ -450,7 +446,6 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
     /**
      * Test serialization and deserialization of the test query.
      */
-    @Test
     public void testSerialization() throws IOException {
         QB testQuery = createTestQueryBuilder();
         assertSerialization(testQuery);
@@ -474,7 +469,6 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
         }
     }
 
-    @Test
     public void testEqualsAndHashcode() throws IOException {
         QB firstQuery = createTestQueryBuilder();
         assertFalse("query is equal to null", firstQuery.equals(null));
@@ -528,7 +522,7 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
      * @return a new {@link QueryShardContext} based on the base test index and queryParserService
      */
     protected static QueryShardContext createShardContext() {
-        QueryShardContext queryCreationContext = new QueryShardContext(index, queryParserService);
+        QueryShardContext queryCreationContext = new QueryShardContext(queryParserService);
         queryCreationContext.reset();
         queryCreationContext.parseFieldMatcher(ParseFieldMatcher.STRICT);
         return queryCreationContext;
