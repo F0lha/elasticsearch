@@ -20,6 +20,7 @@ package org.elasticsearch.index;
 
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
+import org.elasticsearch.Version;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.inject.ModuleTestCase;
 import org.elasticsearch.common.settings.Settings;
@@ -27,31 +28,87 @@ import org.elasticsearch.index.engine.EngineConfig;
 import org.elasticsearch.index.engine.EngineException;
 import org.elasticsearch.index.engine.EngineFactory;
 import org.elasticsearch.index.engine.InternalEngineFactory;
+import org.elasticsearch.index.shard.IndexEventListener;
 import org.elasticsearch.index.shard.IndexSearcherWrapper;
+import org.elasticsearch.test.IndexSettingsModule;
 import org.elasticsearch.test.engine.MockEngineFactory;
+
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class IndexModuleTests extends ModuleTestCase {
 
     public void testWrapperIsBound() {
-        IndexModule module = new IndexModule(IndexMetaData.PROTO);
+        final Index index = new Index("foo");
+        final Settings settings = Settings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
+        IndexSettings indexSettings = IndexSettingsModule.newIndexSettings(index, settings, Collections.EMPTY_LIST);
+        IndexModule module = new IndexModule(indexSettings);
         assertInstanceBinding(module, IndexSearcherWrapper.class,(x) -> x == null);
         module.indexSearcherWrapper = Wrapper.class;
         assertBinding(module, IndexSearcherWrapper.class, Wrapper.class);
     }
 
     public void testEngineFactoryBound() {
-        IndexModule module = new IndexModule(IndexMetaData.PROTO);
+        final Index index = new Index("foo");
+        final Settings settings = Settings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
+        IndexSettings indexSettings = IndexSettingsModule.newIndexSettings(index, settings, Collections.EMPTY_LIST);
+        IndexModule module = new IndexModule(indexSettings);
         assertBinding(module, EngineFactory.class, InternalEngineFactory.class);
         module.engineFactoryImpl = MockEngineFactory.class;
         assertBinding(module, EngineFactory.class, MockEngineFactory.class);
     }
 
     public void testOtherServiceBound() {
-        final IndexMetaData meta = IndexMetaData.builder(IndexMetaData.PROTO).index("foo").build();
-        IndexModule module = new IndexModule(meta);
+        final AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+        final IndexEventListener eventListener = new IndexEventListener() {
+            @Override
+            public void beforeIndexDeleted(IndexService indexService) {
+                atomicBoolean.set(true);
+            }
+        };
+        final Index index = new Index("foo");
+        final Settings settings = Settings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
+        IndexSettings indexSettings = IndexSettingsModule.newIndexSettings(index, settings, Collections.EMPTY_LIST);
+        IndexModule module = new IndexModule(indexSettings);
+        Consumer<Settings> listener = (s) -> {};
+        module.addIndexSettingsListener(listener);
+        module.addIndexEventListener(eventListener);
         assertBinding(module, IndexService.class, IndexService.class);
         assertBinding(module, IndexServicesProvider.class, IndexServicesProvider.class);
-        assertInstanceBinding(module, IndexMetaData.class, (x) -> x == meta);
+        assertInstanceBinding(module, IndexEventListener.class, (x) -> {x.beforeIndexDeleted(null); return atomicBoolean.get();});
+        assertInstanceBinding(module, IndexSettings.class, (x) -> x.getSettings().getAsMap().equals(indexSettings.getSettings().getAsMap()));
+        assertInstanceBinding(module, IndexSettings.class, (x) -> x.getIndex().equals(indexSettings.getIndex()));
+        assertInstanceBinding(module, IndexSettings.class, (x) -> x.getUpdateListeners().get(0) == listener);
+    }
+
+
+    public void testListener() {
+        final Index index = new Index("foo");
+        final Settings settings = Settings.builder().put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
+        IndexSettings indexSettings = IndexSettingsModule.newIndexSettings(index, settings, Collections.EMPTY_LIST);
+        IndexModule module = new IndexModule(indexSettings);
+        Consumer<Settings> listener = (s) -> {
+        };
+        module.addIndexSettingsListener(listener);
+
+        try {
+            module.addIndexSettingsListener(listener);
+            fail("already added");
+        } catch (IllegalStateException ex) {
+
+        }
+
+        try {
+            module.addIndexSettingsListener(null);
+            fail("must not be null");
+        } catch (IllegalArgumentException ex) {
+
+        }
+        assertInstanceBinding(module, IndexSettings.class, (x) -> x.getUpdateListeners().size() == 1);
+        assertInstanceBinding(module, IndexSettings.class, (x) -> x.getUpdateListeners().get(0) == listener);
+
+
     }
 
     public static final class Wrapper extends IndexSearcherWrapper {

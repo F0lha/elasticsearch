@@ -63,6 +63,11 @@ Scroll requests sorted by `_doc` have been optimized to more efficiently resume
 from where the previous request stopped, so this will have the same performance
 characteristics as the former `scan` search type.
 
+==== search exists api removed
+
+The search exists api has been removed in favour of using the search api with
+`size` set to `0` and `terminate_after` set to `1`.
+
 === Parent/Child changes
 
 The `children` aggregation, parent child inner hits and `has_child` and `has_parent` queries will not work on indices
@@ -324,3 +329,9 @@ to index a document only if it doesn't already exist.
 Two cache concurrency level settings `indices.requests.cache.concurrency_level` and
 `indices.fielddata.cache.concurrency_level` because they no longer apply to the cache implementation used for the
 request cache and the field data cache.
+
+=== Remove bind option of `non_loopback`
+
+This setting would arbitrarily pick the first interface not marked as loopback. Instead, specify by address
+scope (e.g. `_local_,_site_` for all loopback and private network addresses) or by explicit interface names,
+hostnames, or addresses. 
