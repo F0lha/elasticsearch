@@ -17,16 +17,7 @@
  * under the License.
  */
 
-package org.elasticsearch.test.store;
+package org.elasticsearch.cluster.action.shard;
 
-import org.elasticsearch.common.inject.AbstractModule;
-import org.elasticsearch.index.store.IndexStore;
-
-public class MockFSIndexStoreModule extends AbstractModule {
-
-    @Override
-    protected void configure() {
-        bind(IndexStore.class).to(MockFSIndexStore.class).asEagerSingleton();
-    }
-
+public class NoOpShardStateActionListener implements ShardStateAction.Listener {
 }

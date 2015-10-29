@@ -44,7 +44,6 @@ import org.elasticsearch.index.*;
 import org.elasticsearch.index.analysis.AnalysisModule;
 import org.elasticsearch.index.analysis.AnalysisService;
 import org.elasticsearch.index.cache.IndexCache;
-import org.elasticsearch.index.cache.IndexCacheModule;
 import org.elasticsearch.index.fielddata.IndexFieldDataService;
 import org.elasticsearch.index.flush.FlushStats;
 import org.elasticsearch.index.get.GetStats;
@@ -59,10 +58,11 @@ import org.elasticsearch.index.shard.IllegalIndexShardStateException;
 import org.elasticsearch.index.shard.IndexShard;
 import org.elasticsearch.index.shard.IndexEventListener;
 import org.elasticsearch.index.shard.ShardId;
-import org.elasticsearch.index.similarity.SimilarityModule;
-import org.elasticsearch.index.store.IndexStoreModule;
+import org.elasticsearch.index.store.IndexStoreConfig;
 import org.elasticsearch.indices.analysis.IndicesAnalysisService;
+import org.elasticsearch.indices.cache.query.IndicesQueryCache;
 import org.elasticsearch.indices.recovery.RecoverySettings;
+import org.elasticsearch.node.settings.NodeSettingsService;
 import org.elasticsearch.plugins.PluginsService;
 
 import java.io.Closeable;
@@ -77,8 +77,6 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
-import static org.elasticsearch.cluster.metadata.IndexMetaData.SETTING_NUMBER_OF_REPLICAS;
-import static org.elasticsearch.cluster.metadata.IndexMetaData.SETTING_NUMBER_OF_SHARDS;
 import static org.elasticsearch.common.collect.MapBuilder.newMapBuilder;
 import static org.elasticsearch.common.settings.Settings.settingsBuilder;
 import static org.elasticsearch.common.util.CollectionUtils.arrayAsArrayList;
@@ -96,6 +94,8 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
     private final PluginsService pluginsService;
     private final NodeEnvironment nodeEnv;
     private final TimeValue shardsClosedTimeout;
+    private final IndicesWarmer indicesWarmer;
+    private final IndicesQueryCache indicesQueryCache;
 
     private volatile Map<String, IndexServiceInjectorPair> indices = emptyMap();
 
@@ -120,15 +120,20 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
     private final Map<Index, List<PendingDelete>> pendingDeletes = new HashMap<>();
 
     private final OldShardsStats oldShardsStats = new OldShardsStats();
+    private final IndexStoreConfig indexStoreConfig;
 
     @Inject
-    public IndicesService(Settings settings, IndicesAnalysisService indicesAnalysisService, Injector injector, PluginsService pluginsService,  NodeEnvironment nodeEnv) {
+    public IndicesService(Settings settings, IndicesAnalysisService indicesAnalysisService, Injector injector, PluginsService pluginsService, NodeEnvironment nodeEnv, NodeSettingsService nodeSettingsService, IndicesQueryCache indicesQueryCache, IndicesWarmer indicesWarmer) {
         super(settings);
         this.indicesAnalysisService = indicesAnalysisService;
         this.injector = injector;
         this.pluginsService = pluginsService;
         this.nodeEnv = nodeEnv;
+        this.indicesWarmer = indicesWarmer;
+        this.indicesQueryCache = indicesQueryCache;
         this.shardsClosedTimeout = settings.getAsTime(INDICES_SHARDS_CLOSED_TIMEOUT, new TimeValue(1, TimeUnit.DAYS));
+        this.indexStoreConfig = new IndexStoreConfig(settings);
+        nodeSettingsService.addListener(indexStoreConfig);
     }
 
     @Override
@@ -143,16 +148,13 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
         Set<String> indices = new HashSet<>(this.indices.keySet());
         final CountDownLatch latch = new CountDownLatch(indices.size());
         for (final String index : indices) {
-            indicesStopExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        removeIndex(index, "shutdown", false);
-                    } catch (Throwable e) {
-                        logger.warn("failed to remove index on stop [" + index + "]", e);
-                    } finally {
-                        latch.countDown();
-                    }
+            indicesStopExecutor.execute(() -> {
+                try {
+                    removeIndex(index, "shutdown", false);
+                } catch (Throwable e) {
+                    logger.warn("failed to remove index on stop [" + index + "]", e);
+                } finally {
+                    latch.countDown();
                 }
             });
         }
@@ -290,6 +292,7 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
         if (!lifecycle.started()) {
             throw new IllegalStateException("Can't create an index [" + indexMetaData.getIndex() + "], node is closed");
         }
+
         final IndexSettings idxSettings = new IndexSettings(indexMetaData, this.settings, Collections.EMPTY_LIST);
         Index index = new Index(indexMetaData.getIndex());
         if (indices.containsKey(index.name())) {
@@ -307,15 +310,12 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
         for (Module pluginModule : pluginsService.indexModules(idxSettings.getSettings())) {
             modules.add(pluginModule);
         }
-        final IndexModule indexModule = new IndexModule(idxSettings);
+        final IndexModule indexModule = new IndexModule(idxSettings, indexStoreConfig, indicesQueryCache, indicesWarmer);
         for (IndexEventListener listener : builtInListeners) {
             indexModule.addIndexEventListener(listener);
         }
         indexModule.addIndexEventListener(oldShardsStats);
-        modules.add(new IndexStoreModule(idxSettings.getSettings()));
         modules.add(new AnalysisModule(idxSettings.getSettings(), indicesAnalysisService));
-        modules.add(new SimilarityModule(idxSettings));
-        modules.add(new IndexCacheModule(idxSettings.getSettings()));
         modules.add(indexModule);
         pluginsService.processModules(modules);
         final IndexEventListener listener = indexModule.freeze();

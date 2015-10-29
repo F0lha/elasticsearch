@@ -19,37 +19,75 @@
 
 package org.elasticsearch.index;
 
-import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.apache.lucene.util.SetOnce;
 import org.elasticsearch.common.inject.AbstractModule;
-import org.elasticsearch.common.inject.util.Providers;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.index.cache.IndexCache;
+import org.elasticsearch.index.cache.bitset.BitsetFilterCache;
+import org.elasticsearch.index.cache.query.QueryCache;
+import org.elasticsearch.index.cache.query.index.IndexQueryCache;
+import org.elasticsearch.index.cache.query.none.NoneQueryCache;
 import org.elasticsearch.index.engine.EngineFactory;
 import org.elasticsearch.index.engine.InternalEngineFactory;
 import org.elasticsearch.index.fielddata.IndexFieldDataService;
 import org.elasticsearch.index.mapper.MapperService;
 import org.elasticsearch.index.shard.IndexEventListener;
 import org.elasticsearch.index.shard.IndexSearcherWrapper;
+import org.elasticsearch.index.similarity.BM25SimilarityProvider;
+import org.elasticsearch.index.similarity.SimilarityProvider;
+import org.elasticsearch.index.similarity.SimilarityService;
+import org.elasticsearch.index.store.IndexStore;
+import org.elasticsearch.index.store.IndexStoreConfig;
+import org.elasticsearch.indices.IndicesWarmer;
+import org.elasticsearch.indices.cache.query.IndicesQueryCache;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
- *
+ * IndexModule represents the central extension point for index level custom implementations like:
+ * <ul>
+ *     <li>{@link SimilarityProvider} - New {@link SimilarityProvider} implementations can be registered through {@link #addSimilarity(String, BiFunction)}
+ *         while existing Providers can be referenced through Settings under the {@link IndexModule#SIMILARITY_SETTINGS_PREFIX} prefix
+ *         along with the "type" value.  For example, to reference the {@link BM25SimilarityProvider}, the configuration
+ *         <tt>"index.similarity.my_similarity.type : "BM25"</tt> can be used.</li>
+ *      <li>{@link IndexStore} - Custom {@link IndexStore} instances can be registered via {@link #addIndexStore(String, BiFunction)}</li>
+ *      <li>{@link IndexEventListener} - Custom {@link IndexEventListener} instances can be registered via {@link #addIndexEventListener(IndexEventListener)}</li>
+ *      <li>Settings update listener - Custom settings update listener can be registered via {@link #addIndexSettingsListener(Consumer)}</li>
+ * </ul>
  */
-public class IndexModule extends AbstractModule {
+public final class IndexModule extends AbstractModule {
 
+    public static final String STORE_TYPE = "index.store.type";
+    public static final String SIMILARITY_SETTINGS_PREFIX = "index.similarity";
+    public static final String INDEX_QUERY_CACHE = "index";
+    public static final String NONE_QUERY_CACHE = "none";
+    public static final String QUERY_CACHE_TYPE = "index.queries.cache.type";
+    // for test purposes only
+    public static final String QUERY_CACHE_EVERYTHING = "index.queries.cache.everything";
     private final IndexSettings indexSettings;
+    private final IndexStoreConfig indexStoreConfig;
+    private final IndicesQueryCache indicesQueryCache;
     // pkg private so tests can mock
     Class<? extends EngineFactory> engineFactoryImpl = InternalEngineFactory.class;
-    Class<? extends IndexSearcherWrapper> indexSearcherWrapper = null;
+    private SetOnce<IndexSearcherWrapperFactory> indexSearcherWrapper = new SetOnce<>();
     private final Set<Consumer<Settings>> settingsConsumers = new HashSet<>();
     private final Set<IndexEventListener> indexEventListeners = new HashSet<>();
     private IndexEventListener listener;
+    private final Map<String, BiFunction<String, Settings, SimilarityProvider>> similarities = new HashMap<>();
+    private final Map<String, BiFunction<IndexSettings, IndexStoreConfig, IndexStore>> storeTypes = new HashMap<>();
+    private final Map<String, BiFunction<IndexSettings, IndicesQueryCache, QueryCache>> queryCaches = new HashMap<>();
+    private IndicesWarmer indicesWarmer;
 
 
-    public IndexModule(IndexSettings indexSettings) {
+    public IndexModule(IndexSettings indexSettings, IndexStoreConfig indexStoreConfig, IndicesQueryCache indicesQueryCache, IndicesWarmer warmer) {
+        this.indexStoreConfig = indexStoreConfig;
         this.indexSettings = indexSettings;
+        this.indicesQueryCache = indicesQueryCache;
+        this.indicesWarmer = warmer;
+        registerQueryCache(INDEX_QUERY_CACHE, IndexQueryCache::new);
+        registerQueryCache(NONE_QUERY_CACHE, (a, b) -> new NoneQueryCache(a));
     }
 
     /**
@@ -105,6 +143,60 @@ public class IndexModule extends AbstractModule {
         this.indexEventListeners.add(listener);
     }
 
+    /**
+     * Adds an {@link IndexStore} type to this index module. Typically stores are registered with a refrence to
+     * it's constructor:
+     * <pre>
+     *     indexModule.addIndexStore("my_store_type", MyStore::new);
+     * </pre>
+     *
+     * @param type the type to register
+     * @param provider the instance provider / factory method
+     */
+    public void addIndexStore(String type, BiFunction<IndexSettings, IndexStoreConfig, IndexStore> provider) {
+        if (storeTypes.containsKey(type)) {
+            throw new IllegalArgumentException("key [" + type +"] already registerd");
+        }
+        storeTypes.put(type, provider);
+    }
+
+
+    /**
+     * Registers the given {@link SimilarityProvider} with the given name
+     *
+     * @param name Name of the SimilarityProvider
+     * @param similarity SimilarityProvider to register
+     */
+    public void addSimilarity(String name, BiFunction<String, Settings, SimilarityProvider> similarity) {
+        if (similarities.containsKey(name) || SimilarityService.BUILT_IN.containsKey(name)) {
+            throw new IllegalArgumentException("similarity for name: [" + name + " is already registered");
+        }
+        similarities.put(name, similarity);
+    }
+
+    /**
+     * Registers a {@link QueryCache} provider for a given name
+     * @param name the providers / caches name
+     * @param provider the provider instance
+     */
+    public void registerQueryCache(String name, BiFunction<IndexSettings, IndicesQueryCache, QueryCache> provider) {
+        if (provider == null) {
+            throw new IllegalArgumentException("provider must not be null");
+        }
+        if (queryCaches.containsKey(name)) {
+            throw new IllegalArgumentException("Can't register the same [query_cache] more than once for [" + name + "]");
+        }
+        queryCaches.put(name, provider);
+    }
+
+    /**
+     * Sets a {@link org.elasticsearch.index.IndexModule.IndexSearcherWrapperFactory} that is called once the IndexService is fully constructed.
+     * Note: this method can only be called once per index. Multiple wrappers are not supported.
+     */
+    public void setSearcherWrapper(IndexSearcherWrapperFactory indexSearcherWrapperFactory) {
+        this.indexSearcherWrapper.set(indexSearcherWrapperFactory);
+    }
+
     public IndexEventListener freeze() {
         // TODO somehow we need to make this pkg private...
         if (listener == null) {
@@ -113,20 +205,79 @@ public class IndexModule extends AbstractModule {
         return listener;
     }
 
+    private static boolean isBuiltinType(String storeType) {
+        for (Type type : Type.values()) {
+            if (type.match(storeType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void configure() {
         bind(EngineFactory.class).to(engineFactoryImpl).asEagerSingleton();
-        if (indexSearcherWrapper == null) {
-            bind(IndexSearcherWrapper.class).toProvider(Providers.of(null));
-        } else {
-            bind(IndexSearcherWrapper.class).to(indexSearcherWrapper).asEagerSingleton();
-        }
+        bind(IndexSearcherWrapperFactory.class).toInstance(indexSearcherWrapper.get() == null ? (shard) -> null : indexSearcherWrapper.get());
         bind(IndexEventListener.class).toInstance(freeze());
         bind(IndexService.class).asEagerSingleton();
         bind(IndexServicesProvider.class).asEagerSingleton();
         bind(MapperService.class).asEagerSingleton();
         bind(IndexFieldDataService.class).asEagerSingleton();
-        bind(IndexSettings.class).toInstance(new IndexSettings(indexSettings.getIndexMetaData(), indexSettings.getNodeSettings(), settingsConsumers));
+        final IndexSettings settings = new IndexSettings(indexSettings.getIndexMetaData(), indexSettings.getNodeSettings(), settingsConsumers);
+        bind(IndexSettings.class).toInstance(settings);
+
+        final String storeType = settings.getSettings().get(STORE_TYPE);
+        final IndexStore store;
+        if (storeType == null || isBuiltinType(storeType)) {
+            store = new IndexStore(settings, indexStoreConfig);
+        } else {
+            BiFunction<IndexSettings, IndexStoreConfig, IndexStore> factory = storeTypes.get(storeType);
+            if (factory == null) {
+                throw new IllegalArgumentException("Unknown store type [" + storeType + "]");
+            }
+            store = factory.apply(settings, indexStoreConfig);
+            if (store == null) {
+                throw new IllegalStateException("store must not be null");
+            }
+        }
+
+        final String queryCacheType = settings.getSettings().get(IndexModule.QUERY_CACHE_TYPE, IndexModule.INDEX_QUERY_CACHE);
+        BiFunction<IndexSettings, IndicesQueryCache, QueryCache> queryCacheProvider = queryCaches.get(queryCacheType);
+        BitsetFilterCache bitsetFilterCache = new BitsetFilterCache(settings, indicesWarmer);
+        QueryCache queryCache = queryCacheProvider.apply(settings, indicesQueryCache);
+        IndexCache indexCache = new IndexCache(settings, queryCache, bitsetFilterCache);
+        bind(QueryCache.class).toInstance(queryCache);
+        bind(IndexCache.class).toInstance(indexCache);
+        bind(BitsetFilterCache.class).toInstance(bitsetFilterCache);
+        bind(IndexStore.class).toInstance(store);
+        bind(SimilarityService.class).toInstance(new SimilarityService(settings, similarities));
     }
 
+    public enum Type {
+        NIOFS,
+        MMAPFS,
+        SIMPLEFS,
+        FS,
+        DEFAULT;
+
+        public String getSettingsKey() {
+            return this.name().toLowerCase(Locale.ROOT);
+        }
+        /**
+         * Returns true iff this settings matches the type.
+         */
+        public boolean match(String setting) {
+            return getSettingsKey().equals(setting);
+        }
+    }
+
+    /**
+     * Factory for creating new {@link IndexSearcherWrapper} instances
+     */
+    public interface IndexSearcherWrapperFactory {
+        /**
+         * Returns a new IndexSearcherWrapper. This method is called once per index per node
+         */
+        IndexSearcherWrapper newWrapper(final IndexService indexService);
+    }
 }

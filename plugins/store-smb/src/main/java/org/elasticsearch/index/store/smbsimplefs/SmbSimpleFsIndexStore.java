@@ -19,18 +19,16 @@
 
 package org.elasticsearch.index.store.smbsimplefs;
 
-import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.shard.ShardPath;
 import org.elasticsearch.index.store.DirectoryService;
 import org.elasticsearch.index.store.IndexStore;
-import org.elasticsearch.indices.store.IndicesStore;
+import org.elasticsearch.index.store.IndexStoreConfig;
 
 public class SmbSimpleFsIndexStore extends IndexStore {
 
-    @Inject
-    public SmbSimpleFsIndexStore(IndexSettings indexSettings, IndicesStore indicesStore) {
-        super(indexSettings, indicesStore);
+    public SmbSimpleFsIndexStore(IndexSettings indexSettings, IndexStoreConfig indexStoreConfig) {
+        super(indexSettings, indexStoreConfig);
     }
 
     @Override

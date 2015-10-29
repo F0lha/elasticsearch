@@ -39,10 +39,13 @@ import org.elasticsearch.env.EnvironmentModule;
 import org.elasticsearch.index.Index;
 import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AnalysisModule;
-import org.elasticsearch.index.cache.IndexCacheModule;
+import org.elasticsearch.index.cache.IndexCache;
+import org.elasticsearch.index.cache.bitset.BitsetFilterCache;
+import org.elasticsearch.index.cache.query.none.NoneQueryCache;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionParser;
-import org.elasticsearch.index.similarity.SimilarityModule;
+import org.elasticsearch.index.similarity.SimilarityService;
 import org.elasticsearch.indices.IndicesModule;
+import org.elasticsearch.indices.IndicesWarmer;
 import org.elasticsearch.indices.analysis.IndicesAnalysisService;
 import org.elasticsearch.indices.breaker.CircuitBreakerService;
 import org.elasticsearch.indices.breaker.NoneCircuitBreakerService;
@@ -96,12 +99,16 @@ public class TemplateQueryParserTests extends ESTestCase {
                 },
                 new ScriptModule(settings),
                 new IndexSettingsModule(index, settings),
-                new IndexCacheModule(settings),
                 new AnalysisModule(settings, new IndicesAnalysisService(settings)),
-                new SimilarityModule(IndexSettingsModule.newIndexSettings(index, settings, Collections.EMPTY_LIST)),
                 new AbstractModule() {
                     @Override
                     protected void configure() {
+                        IndexSettings idxSettings = IndexSettingsModule.newIndexSettings(index, settings, Collections.EMPTY_LIST);
+                        SimilarityService service = new SimilarityService(idxSettings, Collections.EMPTY_MAP);
+                        BitsetFilterCache bitsetFilterCache = new BitsetFilterCache(idxSettings, new IndicesWarmer(idxSettings.getNodeSettings(), null));
+                        bind(BitsetFilterCache.class).toInstance(bitsetFilterCache);
+                        bind(IndexCache.class).toInstance(new IndexCache(idxSettings, new NoneQueryCache(idxSettings), bitsetFilterCache));
+                        bind(SimilarityService.class).toInstance(service);
                         bind(Client.class).toInstance(proxy); // not needed here
                         Multibinder.newSetBinder(binder(), ScoreFunctionParser.class);
                         bind(ClusterService.class).toProvider(Providers.of((ClusterService) null));

@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -79,6 +80,7 @@ public abstract class Engine implements Closeable {
     protected final ReleasableLock readLock = new ReleasableLock(rwl.readLock());
     protected final ReleasableLock writeLock = new ReleasableLock(rwl.writeLock());
     protected volatile Throwable failedEngine = null;
+    protected volatile long lastWriteNanos = Long.MAX_VALUE; // no write yet!
 
     protected Engine(EngineConfig engineConfig) {
         Objects.requireNonNull(engineConfig.getStore(), "Store must be provided to the engine");
@@ -562,6 +564,9 @@ public abstract class Engine implements Closeable {
 
 
     public interface EventListener {
+        /**
+         * Called when a fatal exception occurred
+         */
         default void onFailedEngine(String reason, @Nullable Throwable t) {}
     }
 
@@ -1039,5 +1044,30 @@ public abstract class Engine implements Closeable {
     }
 
     public void onSettingsChanged() {
+    }
+
+    /**
+     * Returns the timestamp of the last write in nanoseconds.
+     * Note: this time might not be absolutely accurate since the {@link Operation#startTime()} is used which might be
+     * slightly inaccurate.
+     * @see System#nanoTime()
+     * @see Operation#startTime()
+     */
+    public long getLastWriteNanos() {
+        return this.lastWriteNanos;
+    }
+
+    /**
+     * Called for each new opened engine searcher to warm new segments
+     * @see EngineConfig#getWarmer()
+     */
+    public interface Warmer {
+        /**
+         * Called once a new Searcher is opened.
+         * @param searcher the searcer to warm
+         * @param isTopLevelReader <code>true</code> iff the searcher is build from a top-level reader.
+         *                         Otherwise the searcher might be build from a leaf reader to warm in isolation
+         */
+        void warm(Engine.Searcher searcher, boolean isTopLevelReader);
     }
 }

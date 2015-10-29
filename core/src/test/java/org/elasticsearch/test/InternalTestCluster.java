@@ -62,21 +62,19 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.http.HttpServerTransport;
+import org.elasticsearch.index.IndexModule;
 import org.elasticsearch.index.IndexService;
-import org.elasticsearch.index.cache.IndexCacheModule;
 import org.elasticsearch.index.engine.CommitStats;
 import org.elasticsearch.index.engine.Engine;
-import org.elasticsearch.index.engine.EngineClosedException;
 import org.elasticsearch.index.shard.IndexShard;
 import org.elasticsearch.index.MockEngineFactoryPlugin;
 import org.elasticsearch.index.shard.ShardId;
+import org.elasticsearch.index.store.IndexStoreConfig;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.breaker.CircuitBreakerService;
 import org.elasticsearch.indices.breaker.HierarchyCircuitBreakerService;
-import org.elasticsearch.indices.cache.request.IndicesRequestCache;
 import org.elasticsearch.indices.fielddata.cache.IndicesFieldDataCache;
 import org.elasticsearch.indices.recovery.RecoverySettings;
-import org.elasticsearch.indices.store.IndicesStore;
 import org.elasticsearch.node.MockNode;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeMocksPlugin;
@@ -448,22 +446,22 @@ public final class InternalTestCluster extends TestCluster {
         }
 
         if (random.nextBoolean()) {
-            builder.put(IndexCacheModule.QUERY_CACHE_TYPE, random.nextBoolean() ? IndexCacheModule.INDEX_QUERY_CACHE : IndexCacheModule.NONE_QUERY_CACHE);
+            builder.put(IndexModule.QUERY_CACHE_TYPE, random.nextBoolean() ? IndexModule.INDEX_QUERY_CACHE : IndexModule.NONE_QUERY_CACHE);
         }
 
         if (random.nextBoolean()) {
-            builder.put(IndexCacheModule.QUERY_CACHE_EVERYTHING, random.nextBoolean());
+            builder.put(IndexModule.QUERY_CACHE_EVERYTHING, random.nextBoolean());
         }
 
         if (random.nextBoolean()) {
             if (random.nextInt(10) == 0) { // do something crazy slow here
-                builder.put(IndicesStore.INDICES_STORE_THROTTLE_MAX_BYTES_PER_SEC, new ByteSizeValue(RandomInts.randomIntBetween(random, 1, 10), ByteSizeUnit.MB));
+                builder.put(IndexStoreConfig.INDICES_STORE_THROTTLE_MAX_BYTES_PER_SEC, new ByteSizeValue(RandomInts.randomIntBetween(random, 1, 10), ByteSizeUnit.MB));
             } else {
-                builder.put(IndicesStore.INDICES_STORE_THROTTLE_MAX_BYTES_PER_SEC, new ByteSizeValue(RandomInts.randomIntBetween(random, 10, 200), ByteSizeUnit.MB));
+                builder.put(IndexStoreConfig.INDICES_STORE_THROTTLE_MAX_BYTES_PER_SEC, new ByteSizeValue(RandomInts.randomIntBetween(random, 10, 200), ByteSizeUnit.MB));
             }
         }
         if (random.nextBoolean()) {
-            builder.put(IndicesStore.INDICES_STORE_THROTTLE_TYPE, RandomPicks.randomFrom(random, StoreRateLimiting.Type.values()));
+            builder.put(IndexStoreConfig.INDICES_STORE_THROTTLE_TYPE, RandomPicks.randomFrom(random, StoreRateLimiting.Type.values()));
         }
 
         if (random.nextBoolean()) {
