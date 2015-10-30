@@ -21,7 +21,6 @@ package org.elasticsearch.index.query;
 
 import com.carrotsearch.randomizedtesting.generators.CodepointSetGenerator;
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
-
 import org.apache.lucene.search.Query;
 import org.elasticsearch.Version;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
@@ -58,28 +57,26 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.env.EnvironmentModule;
 import org.elasticsearch.index.Index;
-import org.elasticsearch.index.IndexNameModule;
+import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AnalysisModule;
-import org.elasticsearch.index.cache.IndexCacheModule;
+import org.elasticsearch.index.cache.IndexCache;
+import org.elasticsearch.index.cache.bitset.BitsetFilterCache;
+import org.elasticsearch.index.cache.query.none.NoneQueryCache;
 import org.elasticsearch.index.mapper.MapperService;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionParser;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionParserMapper;
 import org.elasticsearch.index.query.support.QueryParsers;
-import org.elasticsearch.index.settings.IndexSettingsModule;
-import org.elasticsearch.index.similarity.SimilarityModule;
+import org.elasticsearch.index.similarity.SimilarityService;
 import org.elasticsearch.indices.IndicesModule;
+import org.elasticsearch.indices.IndicesWarmer;
 import org.elasticsearch.indices.analysis.IndicesAnalysisService;
 import org.elasticsearch.indices.breaker.CircuitBreakerService;
 import org.elasticsearch.indices.breaker.NoneCircuitBreakerService;
-import org.elasticsearch.script.MockScriptEngine;
-import org.elasticsearch.script.ScriptContext;
-import org.elasticsearch.script.ScriptContextRegistry;
-import org.elasticsearch.script.ScriptEngineService;
-import org.elasticsearch.script.ScriptModule;
-import org.elasticsearch.script.ScriptService;
+import org.elasticsearch.script.*;
 import org.elasticsearch.script.mustache.MustacheScriptEngineService;
 import org.elasticsearch.search.internal.SearchContext;
 import org.elasticsearch.test.ESTestCase;
+import org.elasticsearch.test.IndexSettingsModule;
 import org.elasticsearch.test.TestSearchContext;
 import org.elasticsearch.test.VersionUtils;
 import org.elasticsearch.test.cluster.TestClusterService;
@@ -91,18 +88,12 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -174,7 +165,7 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
                 new EnvironmentModule(new Environment(settings)),
                 new SettingsModule(settings),
                 new ThreadPoolModule(new ThreadPool(settings)),
-                new IndicesModule(settings) {
+                new IndicesModule() {
                     @Override
                     public void configure() {
                         // skip services
@@ -214,13 +205,16 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
                     }
                 },
                 new IndexSettingsModule(index, indexSettings),
-                new IndexCacheModule(indexSettings),
                 new AnalysisModule(indexSettings, new IndicesAnalysisService(indexSettings)),
-                new SimilarityModule(index, indexSettings),
-                new IndexNameModule(index),
-        new AbstractModule() {
+                new AbstractModule() {
                     @Override
                     protected void configure() {
+                        IndexSettings idxSettings = IndexSettingsModule.newIndexSettings(index, indexSettings, Collections.emptyList());
+                        SimilarityService service = new SimilarityService(idxSettings, Collections.emptyMap());
+                        bind(SimilarityService.class).toInstance(service);
+                        BitsetFilterCache bitsetFilterCache = new BitsetFilterCache(idxSettings, new IndicesWarmer(idxSettings.getNodeSettings(), null));
+                        bind(BitsetFilterCache.class).toInstance(bitsetFilterCache);
+                        bind(IndexCache.class).toInstance(new IndexCache(idxSettings, new NoneQueryCache(idxSettings), bitsetFilterCache));
                         bind(Client.class).toInstance(proxy);
                         Multibinder.newSetBinder(binder(), ScoreFunctionParser.class);
                         bind(ScoreFunctionParserMapper.class).asEagerSingleton();
@@ -310,7 +304,6 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
      * Generic test that creates new query from the test query and checks both for equality
      * and asserts equality on the two queries.
      */
-    @Test
     public void testFromXContent() throws IOException {
         QB testQuery = createTestQueryBuilder();
         assertParsedQuery(testQuery.toString(), testQuery);
@@ -366,7 +359,6 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
      * Test creates the {@link Query} from the {@link QueryBuilder} under test and delegates the
      * assertions being made on the result to the implementing subclass.
      */
-    @Test
     public void testToQuery() throws IOException {
         QueryShardContext context = createShardContext();
         context.setAllowUnmappedFields(true);
@@ -410,7 +402,7 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
     /**
      * Few queries allow you to set the boost and queryName on the java api, although the corresponding parser doesn't parse them as they are not supported.
      * This method allows to disable boost and queryName related tests for those queries. Those queries are easy to identify: their parsers
-     * don't parse `boost` and `_name` as they don't apply to the specific query: filter query, wrapper query and match_none
+     * don't parse `boost` and `_name` as they don't apply to the specific query: wrapper query and match_none
      */
     protected boolean supportsBoostAndQueryName() {
         return true;
@@ -450,7 +442,6 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
     /**
      * Test serialization and deserialization of the test query.
      */
-    @Test
     public void testSerialization() throws IOException {
         QB testQuery = createTestQueryBuilder();
         assertSerialization(testQuery);
@@ -465,7 +456,7 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
             testQuery.writeTo(output);
             try (StreamInput in = new NamedWriteableAwareStreamInput(StreamInput.wrap(output.bytes()), namedWriteableRegistry)) {
                 QueryBuilder<?> prototype = queryParser(testQuery.getName()).getBuilderPrototype();
-                QueryBuilder deserializedQuery = prototype.readFrom(in);
+                QueryBuilder<?> deserializedQuery = prototype.readFrom(in);
                 assertEquals(deserializedQuery, testQuery);
                 assertEquals(deserializedQuery.hashCode(), testQuery.hashCode());
                 assertNotSame(deserializedQuery, testQuery);
@@ -474,7 +465,6 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
         }
     }
 
-    @Test
     public void testEqualsAndHashcode() throws IOException {
         QB firstQuery = createTestQueryBuilder();
         assertFalse("query is equal to null", firstQuery.equals(null));
@@ -528,7 +518,7 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
      * @return a new {@link QueryShardContext} based on the base test index and queryParserService
      */
     protected static QueryShardContext createShardContext() {
-        QueryShardContext queryCreationContext = new QueryShardContext(index, queryParserService);
+        QueryShardContext queryCreationContext = new QueryShardContext(queryParserService);
         queryCreationContext.reset();
         queryCreationContext.parseFieldMatcher(ParseFieldMatcher.STRICT);
         return queryCreationContext;
