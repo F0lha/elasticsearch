@@ -27,7 +27,12 @@ Implementation View
 <a name="logical"/>
 Logical View
 ------------
-
+<p align="center">
+  <img src="images/package.PNG" >
+    <span class="caption">
+      <p align="center">Package Diagram</p>
+    </span>
+</p>
 <a name="process"/>
 Process View
 ------------
@@ -48,7 +53,7 @@ Deployment view
 </p>
 
 <a name="patterns"/>
-Acrhitectural Patterns
+Architectural Patterns
 ----------------------
 
 * Data flow
