@@ -18,7 +18,7 @@ Overview
 Implementation View
 -------------------
 <p align="center">
-  <img src="images/component.PNG" width="40%" height="40%">
+  <img src="images/component.PNG" >
     <span class="caption">
       <p align="center">Component Diagram</p>
     </span>
@@ -35,7 +35,7 @@ Process View
 Deployment view
 ---------------
 <p align="center">
-  <img src="images/deployment.PNG" width="40%" height="40%">
+  <img src="images/deployment.PNG">
   <span class="caption">
       <p align="center"><b>Deployment Diagram</p>
   </span>
