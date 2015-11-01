@@ -16,7 +16,8 @@ Overview
 
 <a name="implementation" />
 Implementation View
------
+-------------------
+![Component Diagram](images/component.PNG "Component Diagram")
 
 <a name="logical"/>
 Logical View
@@ -29,3 +30,4 @@ Process View
 <a name="deployment"/>
 Deployment view
 ---------------
+![Deployment Diagram](images/deployment.PNG "Deployment Diagram")
