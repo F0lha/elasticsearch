@@ -9,6 +9,7 @@ Elasticsearch is a distributed search engine and data storage system based on Ap
 2. [Logical View](#logical)
 3. [Process View](#process)
 4. [Deployment View](#deployment)
+5. [Architectural Patterns](#patterns)
 
 <a name="overview" />
 Overview
@@ -40,3 +41,10 @@ Deployment view
       <p align="center">Deployment Diagram</p>
   </span>
 </p>
+
+<a name="patterns"/>
+Acrhitectural Patterns
+----------------------
+
+* Data flow
+* Client Server
