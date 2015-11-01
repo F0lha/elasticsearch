@@ -18,7 +18,10 @@ Overview
 Implementation View
 -------------------
 <p align="center">
-  ![Component Diagram](images/component.PNG "Component Diagram")
+  <img src="images/component.PNG" width="40%" height="40%">
+    <span class="caption">
+      <p align="center">Component Diagram</p>
+    </span>
 </p>
 <a name="logical"/>
 Logical View
@@ -32,5 +35,8 @@ Process View
 Deployment view
 ---------------
 <p align="center">
-  ![Deployment Diagram](images/deployment.PNG "Deployment Diagram")
+  <img src="images/deployment.PNG" width="40%" height="40%">
+  <span class="caption">
+      <p align="center"><b>Deployment Diagram</p>
+  </span>
 </p>
