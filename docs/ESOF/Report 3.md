@@ -37,6 +37,6 @@ Deployment view
 <p align="center">
   <img src="images/deployment.PNG">
   <span class="caption">
-      <p align="center"><b>Deployment Diagram</p>
+      <p align="center">Deployment Diagram</p>
   </span>
 </p>
