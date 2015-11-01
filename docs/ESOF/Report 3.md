@@ -7,11 +7,11 @@ Elasticsearch is a distributed search engine and data storage system based on Ap
 1. [Introduction](#intro)
 2. [Lucene Library](#lucene)
 3. [REST API](#rest)
-1. [Implementation View](#implementation)
-2. [Logical View](#logical)
-3. [Process View](#process)
-4. [Deployment View](#deployment)
-5. [Architectural Patterns](#patterns)
+4. [Implementation View](#implementation)
+5. [Logical View](#logical)
+6. [Process View](#process)
+7. [Deployment View](#deployment)
+8. [Architectural Patterns](#patterns)
 
 <a name="intro" />
 Introduction
@@ -32,12 +32,14 @@ Elasticsearch uses Lucene as a search server.
 REST API
 --------
 REST (REpresentational State Transfer) is an architectural style, and an approach to communications that is often used in the development of Web services.
-REST'S decoupled architecture, and lighter weight communications between producer and consumer, make REST a popular building style for cloud-based APIs. When Web services use REST architecture, they are called RESTful APIs (Application Programming Interfaces) or REST APIs.
-
+REST'S decoupled architecture, and lighter weight communications between producer and consumer, make REST a popular building style for cloud-based APIs. When Web services use REST architecture, they are called RESTful APIs (Application Programming Interfaces) or REST APIs. Elasticsearch is a RESTful API.
 
 <a name="implementation" />
 Implementation View
 -------------------
+A Component Diagram shows how components are wired together in the software. Components are wired together by using an assembly connector to connect the required interface of one component with the provided interface of another component. This illustrates the service consumer - service provider relationship between the two components.
+
+The Component Diagram below represents the Implementation View of Elasticsearch: 
 <p align="center">
   <img src="images/component.PNG" >
     <span class="caption">
