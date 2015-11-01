@@ -19,6 +19,7 @@
 
 package org.elasticsearch.bootstrap;
 
+import org.elasticsearch.SecureSM;
 import org.elasticsearch.common.SuppressForbidden;
 import org.elasticsearch.common.io.PathUtils;
 import org.elasticsearch.env.Environment;
@@ -88,6 +89,11 @@ import java.util.Map;
  * <pre>
  * JAVA_OPTS="-Djava.security.debug=access,failure" bin/elasticsearch
  * </pre>
+ * <p>
+ * When running tests you have to pass it to the test runner like this:
+ * <pre>
+ * mvn test -Dtests.jvm.argline="-Djava.security.debug=access,failure" ...
+ * </pre>
  * See <a href="https://docs.oracle.com/javase/7/docs/technotes/guides/security/troubleshooting-security.html">
  * Troubleshooting Security</a> for information.
  */
@@ -105,16 +111,7 @@ final class Security {
         Policy.setPolicy(new ESPolicy(createPermissions(environment), getPluginPermissions(environment)));
 
         // enable security manager
-        System.setSecurityManager(new SecurityManager() {
-            // we disable this completely, because its granted otherwise:
-            // 'Note: The "exitVM.*" permission is automatically granted to
-            // all code loaded from the application class path, thus enabling
-            // applications to terminate themselves.'
-            @Override
-            public void checkExit(int status) {
-                throw new SecurityException("exit(" + status + ") not allowed by system policy");
-            }
-        });
+        System.setSecurityManager(new SecureSM());
 
         // do some basic tests
         selfTest();
