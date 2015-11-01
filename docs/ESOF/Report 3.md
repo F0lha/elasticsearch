@@ -5,6 +5,8 @@ Elasticsearch is a distributed search engine and data storage system based on Ap
 <a name="index"/>
 ## Menu
 1. [Introduction](#intro)
+2. [Lucene Library](#lucene)
+3. [REST API](#rest)
 1. [Implementation View](#implementation)
 2. [Logical View](#logical)
 3. [Process View](#process)
@@ -19,6 +21,19 @@ The purpose of this report is to better explain some of the attributes of Elasti
 Firstly, some of the terms used in the diagrams will be explained for a better understanding of the matter.
 
 Then, the diagrams of the 4+1 Architectural View Model as well as its explanations will be presented. Starting with the Component Diagram, referent to the Implementation View, followed by the Package Diagram, referent to the Logical View, Activity Diagram is next, referent to the Process View and finally the Deployment Diagram, referent to the Deployment View. These four views represent the 4 in the architectural view model mentioned before. As for the +1, it stand for the Use Cases Model which was presented in the last report.
+
+<a name="lucene" />
+Lucene Library
+--------------
+Apache LuceneTM is a high-performance, full-featured text search engine library written entirely in Java. It is a technology suitable for nearly any application that requires full-text search, especially cross-platform.
+Elasticsearch uses Lucene as a search server.
+
+<a name="rest" />
+REST API
+--------
+REST (REpresentational State Transfer) is an architectural style, and an approach to communications that is often used in the development of Web services.
+REST'S decoupled architecture, and lighter weight communications between producer and consumer, make REST a popular building style for cloud-based APIs. When Web services use REST architecture, they are called RESTful APIs (Application Programming Interfaces) or REST APIs.
+
 
 <a name="implementation" />
 Implementation View
