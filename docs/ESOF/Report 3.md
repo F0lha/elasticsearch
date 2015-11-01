@@ -28,10 +28,15 @@ Implementation View
 Logical View
 ------------
 
-<a name="requirements"/>
+<a name="process"/>
 Process View
 ------------
-
+<p align="center">
+  <img src="images/process.PNG" >
+    <span class="caption">
+      <p align="center">Activity Diagram</p>
+    </span>
+</p>
 <a name="deployment"/>
 Deployment view
 ---------------
