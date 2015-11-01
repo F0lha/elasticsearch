@@ -28,7 +28,7 @@ Implementation View
 Logical View
 ------------
 <p align="center">
-  <img src="images/package.PNG" >
+  <img src="images/package.png" >
     <span class="caption">
       <p align="center">Package Diagram</p>
     </span>
