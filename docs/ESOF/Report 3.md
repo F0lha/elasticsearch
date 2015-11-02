@@ -49,6 +49,9 @@ The Component Diagram below represents the Implementation View of Elasticsearch:
 <a name="logical"/>
 Logical View
 ------------
+A Package Diagram in the Unified Modeling Language depicts the dependencies between the packages that make up a model. Package diagrams can use packages that represent the different layers of a software system to illustrate the layered architecture of a software system. The dependencies between these packages can be adorned with labels/stereotypes to indicate the communication mechanism between the layers.
+
+The Package Diagram below represents the Logical View of Elasticsearch:
 <p align="center">
   <img src="images/package.png" >
     <span class="caption">
@@ -58,6 +61,9 @@ Logical View
 <a name="process"/>
 Process View
 ------------
+Activity diagrams are graphical representations of workflows of stepwise activities and actions with support for choice, iteration and concurrency. In the Unified Modeling Language, activity diagrams are intended to model both computational and organizational processes. 
+
+The Activity Diagram below represents the Process View of Elasticsearch:
 <p align="center">
   <img src="images/process.PNG" >
     <span class="caption">
@@ -67,6 +73,9 @@ Process View
 <a name="deployment"/>
 Deployment view
 ---------------
+A Deployment Diagram in the Unified Modeling Language models the physical deployment of artifacts on nodes. The nodes appear as boxes, and the artifacts allocated to each node appear as rectangles within the boxes. Nodes may have subnodes, which appear as nested boxes. A single node in a deployment diagram may conceptually represent multiple physical nodes, such as a cluster of database servers.
+
+The Deployment Diagram below represents the Deployment View of Elasticsearch:
 <p align="center">
   <img src="images/deployment.PNG">
   <span class="caption">
