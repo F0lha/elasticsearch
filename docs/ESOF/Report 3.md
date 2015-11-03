@@ -37,8 +37,9 @@ REST'S decoupled architecture, and lighter weight communications between produce
 <a name="implementation" />
 Implementation View
 -------------------
-A Component Diagram shows how components are wired together in the software. Components are wired together by using an assembly connector to connect the required interface of one component with the provided interface of another component. This illustrates the service consumer - service provider relationship between the two components.
+The Implementation View illustrates a system from a programmer's perspective and is concerned with software management. It uses the UML Component Diagram to describe the system components.
 
+A Component Diagram shows how components are wired together in the software. Components are wired together by using an assembly connector to connect the required interface of one component with the provided interface of another component. This illustrates the service consumer - service provider relationship between the two components.
 The Component Diagram below represents the Implementation View of Elasticsearch: 
 <p align="center">
   <img src="images/component.PNG" >
@@ -49,8 +50,9 @@ The Component Diagram below represents the Implementation View of Elasticsearch:
 <a name="logical"/>
 Logical View
 ------------
-A Package Diagram in the Unified Modeling Language depicts the dependencies between the packages that make up a model. Package diagrams can use packages that represent the different layers of a software system to illustrate the layered architecture of a software system. The dependencies between these packages can be adorned with labels/stereotypes to indicate the communication mechanism between the layers.
+The Logical View is concerned with the functionality that the system provides to end-users. The UML Diagram used to describe this view, in this case, is the Package Diagram. 
 
+A Package Diagram in the Unified Modeling Language depicts the dependencies between the packages that make up a model. Package diagrams can use packages that represent the different layers of a software system to illustrate the layered architecture of a software system. The dependencies between these packages can be adorned with labels/stereotypes to indicate the communication mechanism between the layers.
 The Package Diagram below represents the Logical View of Elasticsearch:
 <p align="center">
   <img src="images/package.png" >
@@ -61,8 +63,9 @@ The Package Diagram below represents the Logical View of Elasticsearch:
 <a name="process"/>
 Process View
 ------------
-Activity diagrams are graphical representations of workflows of stepwise activities and actions with support for choice, iteration and concurrency. In the Unified Modeling Language, activity diagrams are intended to model both computational and organizational processes. 
+The Process View deals with the dynamic aspects of the system, explains the system processes and how they communicate, and focuses on the runtime behavior of the system. The Process View addresses concurrency, distribution, integrators, performance, and scalability. The UML Diagram used to represent Process View is the Activity Diagram.
 
+Activity diagrams are graphical representations of workflows of stepwise activities and actions with support for choice, iteration and concurrency. In the Unified Modeling Language, activity diagrams are intended to model both computational and organizational processes. 
 The Activity Diagram below represents the Process View of Elasticsearch:
 <p align="center">
   <img src="images/process.PNG" >
@@ -73,8 +76,9 @@ The Activity Diagram below represents the Process View of Elasticsearch:
 <a name="deployment"/>
 Deployment view
 ---------------
-A Deployment Diagram in the Unified Modeling Language models the physical deployment of artifacts on nodes. The nodes appear as boxes, and the artifacts allocated to each node appear as rectangles within the boxes. Nodes may have subnodes, which appear as nested boxes. A single node in a deployment diagram may conceptually represent multiple physical nodes, such as a cluster of database servers.
+The Deployment View depicts the system from a system engineer's point of view. It is concerned with the topology of software components on the physical layer, as well as the physical connections between these components. The UML Diagram used to represent this view is the Deployment Diagram.
 
+A Deployment Diagram in the Unified Modeling Language models the physical deployment of artifacts on nodes. The nodes appear as boxes, and the artifacts allocated to each node appear as rectangles within the boxes. Nodes may have subnodes, which appear as nested boxes. A single node in a deployment diagram may conceptually represent multiple physical nodes, such as a cluster of database servers.
 The Deployment Diagram below represents the Deployment View of Elasticsearch:
 <p align="center">
   <img src="images/deployment.PNG">
@@ -86,6 +90,5 @@ The Deployment Diagram below represents the Deployment View of Elasticsearch:
 <a name="patterns"/>
 Architectural Patterns
 ----------------------
-
 * Data flow
 * Client Server
