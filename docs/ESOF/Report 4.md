@@ -49,13 +49,16 @@ Separation of concerns
 Understandability
 -----------------
 
+
 <a name="heterogeneity" />
 Heterogeneity
 -------------
+The differences inherent in Java interfaces and the REST API, means that the testing to the latter has to be done differently from the rest of the codebase which is tested using JUnit/carrotsearch. In the REST API tests a JSON request is sent to the system, and the reply, also in JSON is validated against the expected results. In the other tests, Java methods are invoked and their return values, in addition to the attributes of the various classes are checked.
 
 <a name="statistics" />
 Statistics
 ----------
+
 
 [Unit Tests](http://people.apache.org/~rmuir/es-coverage/unit-tests/)
 [Integration Tests](http://people.apache.org/~rmuir/es-coverage/integ-tests/)
