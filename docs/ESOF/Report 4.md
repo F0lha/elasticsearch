@@ -11,6 +11,7 @@ Elasticsearch is a distributed search engine and data storage system based on Ap
 5. [Separation of concerns](#separation_of_concerns)
 6. [Understandability](#understandability)
 7. [Heterogeneity](#heterogeneity)
+8. [Validation](#validation)
 
 <a name="intro" />
 Introduction
@@ -37,7 +38,7 @@ When it comes to the Elasticsearch code itself, the developers have enough flexi
 <a name="observability" />
 Observability
 -------------
-/*In the case of end-to-end test, done on the REST API level, tests amount to sending a JSON-encoded request to the system and comparing the also-JSON-encoded response to the expected result, according to the [specification](https://github.com/elastic/elasticsearch/tree/master/rest-api-spec).*/
+In the case of end-to-end testing, done on the REST API level, tests amount to sending a JSON-encoded request to the system and comparing the also-JSON-encoded response to the expected result, according to the [specification](https://github.com/elastic/elasticsearch/tree/master/rest-api-spec). In the case of the Java Unit tests, the internal state of the various objects can be inspected.
 
 <a name="isolateability" />
 Isolateability
@@ -67,4 +68,14 @@ Statistics
 [Combined](http://people.apache.org/~rmuir/es-coverage/combined/)
 [Jenkins](http://build-us-00.elastic.co/)
 TODO: replace with originals
+
+<a name="validation" />
+Validation
+----------
+Elasticsearch's community is very keen on giving feedback to various existent blogs created by users themselves as well as participating in conferences with the  
+
+Elasticsearch counts on its avid community to point to problems to [their approach](https://aphyr.com/posts/317-call-me-maybe-elasticsearch), pushing the 
+
+
+
 
