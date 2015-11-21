@@ -37,6 +37,7 @@ import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.fielddata.IndexGeoPointFieldData;
 import org.elasticsearch.index.fielddata.MultiGeoPointValues;
 import org.elasticsearch.index.mapper.geo.GeoPointFieldMapper;
+import org.elasticsearch.index.mapper.geo.GeoPointFieldMapperLegacy;
 
 import java.io.IOException;
 
@@ -58,8 +59,9 @@ public class GeoDistanceRangeQuery extends Query {
 
     private final IndexGeoPointFieldData indexFieldData;
 
-    public GeoDistanceRangeQuery(GeoPoint point, Double lowerVal, Double upperVal, boolean includeLower, boolean includeUpper, GeoDistance geoDistance, GeoPointFieldMapper.GeoPointFieldType fieldType, IndexGeoPointFieldData indexFieldData,
-                                  String optimizeBbox) {
+    public GeoDistanceRangeQuery(GeoPoint point, Double lowerVal, Double upperVal, boolean includeLower,
+                                 boolean includeUpper, GeoDistance geoDistance, GeoPointFieldMapperLegacy.GeoPointFieldType fieldType,
+                                 IndexGeoPointFieldData indexFieldData, String optimizeBbox) {
         this.lat = point.lat();
         this.lon = point.lon();
         this.geoDistance = geoDistance;
@@ -169,6 +171,16 @@ public class GeoDistanceRangeQuery extends Query {
                             }
                         }
                         return false;
+                    }
+
+                    @Override
+                    public float matchCost() {
+                        if (distanceBoundingCheck == GeoDistance.ALWAYS_INSTANCE) {
+                            return 0.0f;
+                        } else {
+                            // TODO: is this right (up to 4 comparisons from GeoDistance.SimpleDistanceBoundingCheck)?
+                            return 4.0f;
+                        }
                     }
                 };
                 return new ConstantScoreScorer(this, score(), twoPhaseIterator);
