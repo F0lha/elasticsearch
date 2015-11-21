@@ -19,9 +19,8 @@ Introduction
 Distributed systems, by their very nature, present numerous and difficult testing and deployment challenges, as they need to be operational in a myriad, sometimes unstable production environments. Different operating systems and runtime environments between servers, variable connection speeds and network throughput, timing and communication requirements, and node failures and congestion are but some of the problems that must be accounted for in verifying that the system works properly. 
 
 As such, it becomes necessary to test at the per-commit basis, so as to catch each bug that is introduced as soon as possible, with as many configurations and scenarios as is feasible. In addition to encouraging each contributor to test their changes locally, the core team behind Elasticsearch continuously runs its suite of tests using the tool [Jenkins](https://jenkins-ci.org/). This tool currently hosts [multiple tests](http://jenkins.elasticsearch.org/) running in parallel.
-=======
 As such, it becomes necessary to test at the per-commit basis, so as to catch each bug that is introduced as soon as possible, with as many configurations and scenarios as is feasible. In addition to encouraging each contributor to test their changes locally, the core team behind Elasticsearch continuously runs its suite of tests using the tool [Jenkins](https://jenkins-ci.org/). This tools currently hosts [multiple tests](http://jenkins.elasticsearch.org/) running in parallel of different versions of the software.
->>>>>>> origin/master
+
 
 The testing suite is divided into four main categories:
   - Smoke-test: The first and most straight-forward test is to verify that the committed code compiles at all. Needless to say this constitutes a precondition for the following tests.
