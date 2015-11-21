@@ -31,12 +31,12 @@ The project is able to cover so much of its domain space thanks to the usage of 
 <a name="controllability" />
 Controllability
 ---------------
-When it comes to the Elasticsearch code itself, the developers have enough flexibility to change input parameters as is necessary for any given test. However, external factors such as connection speeds and network congestion remain difficult to account for. However in classes such as (MockServiceTransport)[https://github.com/elastic/elasticsearch/blob/b6c21cc55ab4167a367d1a3c812e3b3659e3dcb9/test-framework/src/main/java/org/elasticsearch/test/transport/MockTransportService.java], these conditions can be simulated.
+When it comes to the Elasticsearch code itself, the developers have enough flexibility to change input parameters as is necessary for any given test. In constrast, external factors such as connection speeds and network congestion remain difficult to account for. However in classes such as [MockServiceTransport](https://github.com/elastic/elasticsearch/blob/b6c21cc55ab4167a367d1a3c812e3b3659e3dcb9/test-framework/src/main/java/org/elasticsearch/test/transport/MockTransportService.java), these conditions can be simulated, although the testing evironment can never truly be made the same as a deployment environment. In addition, its many external dependencies such as Lucene, Netty, Guava present a further point of weakness in the testing as their behaviour and state cannot be directly manipulated; their interfaces must instead be used (much like a black box). The rest of the code is tested with the knowledge of its implementation and thus constituting white-box testing.
 
 <a name="observability" />
 Observability
 -------------
-In the case of end-to-end testing, done on the REST API level, tests amount to sending a JSON-encoded request to the system and comparing the also-JSON-encoded response to the expected result, according to the [specification](https://github.com/elastic/elasticsearch/tree/master/rest-api-spec). In the case of the Java Unit tests, the internal state of the various objects can be inspected. The result of the tests is [displayed in the command line](http://build-us-00.elastic.co/job/elastic,painless,master/lastBuild/console).  
+In the case of end-to-end testing, done on the REST API level, tests amount to sending a JSON-encoded request to the system and comparing the also-JSON-encoded response to the expected result, according to the [specification](https://github.com/elastic/elasticsearch/tree/master/rest-api-spec). In the case of the Java Unit tests, the internal state of the various objects can be inspected. The result of the tests is [displayed in the command line](http://build-us-00.elastic.co/job/elastic,painless,master/lastBuild/console).
 
 <a name="isolateability" />
 Isolateability
