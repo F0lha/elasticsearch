@@ -16,11 +16,9 @@ Elasticsearch is a distributed search engine and data storage system based on Ap
 <a name="intro" />
 Introduction
 ------------
-Distributed systems, by their very nature, present numerous and difficult testing and deployment challenges, as they need to be operational in a myriad, sometimes unstable production environments. Different operating systems and runtime environments between servers, variable connection speeds and network throughput, timing and communication requirements, and node failures and congestion are but some of the problems that must be accounted for in verifying and validating the system. *TODO: add stuff*
+Distributed systems, by their very nature, present numerous and difficult testing and deployment challenges, as they need to be operational in a myriad, sometimes unstable production environments. Different operating systems and runtime environments between servers, variable connection speeds and network throughput, timing and communication requirements, and node failures and congestion are but some of the problems that must be accounted for in verifying that the system works properly. 
 
-As such, it becomes necessary to test at the per-commit basis, so as to catch each bug that is introduced as soon as possible, with as many configurations and scenarios as is feasible. *TODO: add stuff*
-
-The core team behind Elasticsearch continuously runs its suite of tests using the tool [Jenkins](https://jenkins-ci.org/) *TODO: add stuff*
+As such, it becomes necessary to test at the per-commit basis, so as to catch each bug that is introduced as soon as possible, with as many configurations and scenarios as is feasible. In addition to encouraging each contributor to test their changes locally, the core team behind Elasticsearch continuously runs its suite of tests using the tool [Jenkins](https://jenkins-ci.org/). This tools currently hosts [multiple tests](http://jenkins.elasticsearch.org/) running in parallel
 
 The testing suite is divided into four main categories:
   - Smoke-test: The first and most straight-forward test is to verify that the committed code compiles
@@ -48,7 +46,7 @@ In addition to unit testing of already isolated components, Elasticsearch's test
 <a name="separation_of_concerns" />
 Separation of concerns
 ----------------------
-Functionality is duly separated in classes and methods, as such, tests that validate a certain functionality nedd only target those classes and methods that implement them.
+Functionality is duly separated in classes and methods, as such, tests that verify a certain functionality need only target those classes and methods that implement them.
 
 <a name="understandability" />
 Understandability
@@ -58,7 +56,7 @@ The modules composing Elasticsearch are detailed in the [documentation](https://
 <a name="heterogeneity" />
 Heterogeneity
 -------------
-The differences inherent in Java interfaces and the REST API, means that the testing to the latter has to be done differently from the rest of the codebase which is tested using JUnit/carrotsearch. In the REST API tests a JSON request is sent to the system, and the reply, also in JSON is validated against the expected results. In the other tests, Java methods are invoked and their return values as well the attributes of the various classes are checked.
+The differences inherent in Java interfaces and the REST API, mean that the testing to the latter has to be done differently from the rest of the codebase which is tested using JUnit/carrotsearch. In the REST API tests, a JSON request is sent to the system, and the reply, also in JSON, is campared with the expected results. In the other tests, Java methods are invoked and their return values as well the attributes of the various classes are checked.
 
 <a name="statistics" />
 Statistics
@@ -67,14 +65,13 @@ Statistics
 [Integration Tests](http://people.apache.org/~rmuir/es-coverage/integ-tests/)
 [Combined](http://people.apache.org/~rmuir/es-coverage/combined/)
 [Jenkins](http://build-us-00.elastic.co/)
-TODO: replace with originals
 
 <a name="validation" />
 Validation
 ----------
-Elasticsearch's community is very keen on giving feedback to various existent blogs created by users themselves as well as participating in conferences with the  
+The stakeholders, the ones that utilize Elasticsearch, are, in turn, developers themselves, who have chosen it as their search solution over the competion, which includes projects such as (Solr)[http://lucene.apache.org/solr/]. As is expected from such a knowledgeable and invested userbase, feedback about the status of the project is enormous and typically [comprehensive](https://aphyr.com/posts/317-call-me-maybe-elasticsearch). It can be found on the [Elasticsearch forums](https://discuss.elastic.co/c/elasticsearch), in the [issues section on GitHub](https://github.com/elastic/elasticsearch/issues?utf8=%E2%9C%93&q=) and in various [blogs](http://blog.quarkslab.com/mongodb-vs-elasticsearch-the-quest-of-the-holy-performances.html) and (videos)[https://www.elastic.co/videos/just-eat-journey-nosql-elasticsearch] on the Internet.The core team is [always](https://github.com/elastic/elasticsearch/issues/14573) receptive to this feedback, going as far as releasing beta and release candidate versions specifically for the purpose of gathering the communities reactions and criticism, in addition to the already frequent release schedule.
 
-Elasticsearch counts on its avid community to point to problems to [their approach](https://aphyr.com/posts/317-call-me-maybe-elasticsearch), pushing the 
+
 
 
 
