@@ -21,10 +21,10 @@ Distributed systems, by their very nature, present numerous and difficult testin
 As such, it becomes necessary to test at the per-commit basis, so as to catch each bug that is introduced as soon as possible, with as many configurations and scenarios as is feasible. In addition to encouraging each contributor to test their changes locally, the core team behind Elasticsearch continuously runs its suite of tests using the tool [Jenkins](https://jenkins-ci.org/). This tools currently hosts [multiple tests](http://jenkins.elasticsearch.org/) running in parallel
 
 The testing suite is divided into four main categories:
-  - Smoke-test: The first and most straight-forward test is to verify that the committed code compiles
-  - Unit Test: Individual components and class methods are tested in isolation to validate their functionality
+  - Smoke-test: The first and most straight-forward test is to verify that the committed code compiles at all. Needless to say this constitutes a precondition for the following tests.
+  - Unit Test: Individual components and class methods are tested in isolation to validate their functionality.
   - Integration Tests: These aim at catching problems in the interfacing or coupling of different components *TODO add stuff*
-  - End-to-end Tests: Finally, the entire system is checked as a whole and compared to its expected functionality. In Elasticsearch in particular, this entails sending REST requests and queries to the system and validating its JSON responses, with the aid of the [API specification](https://github.com/F0lha/elasticsearch/tree/master/rest-api-spec). This is currently done in YAML format. *TODO change stuff* 
+  - End-to-end Tests: Finally, the entire system is checked as a whole and compared to its expected functionality. In Elasticsearch in particular, this entails sending REST requests and queries to the system and validating its JSON responses, with the aid of the [API specification](https://github.com/F0lha/elasticsearch/tree/master/rest-api-spec). These tests are currently written declaratively in [YAML](http://yaml.org/) format.
 
 The project is able to cover so much of its domain space thanks to the usage of the technique known as Randomized Testing, which is integrated via the [carrotsearch framework](https://github.com/randomizedtesting/randomizedtesting). This approach allows the developers to greatly vary the input data, both in content and volume, between runs of the suite. In addition, through the use of [Puppet](https://puppetlabs.com/), the runtime environment itself is randomized, be it through the variation in factors such as the version of the JVM used and the operating system, this even includes running different versions of Elasticsearch in the same cluster during a single test. This supplements the unit tests in catching bugs that break previously working functionality, that is, it functions as regression testing. It also assures that new versions remain backwards compatible with older ones. Random tests that fail output the seed that was used to generate them so they can be rerun in the future.
 
@@ -36,7 +36,7 @@ When it comes to the Elasticsearch code itself, the developers have enough flexi
 <a name="observability" />
 Observability
 -------------
-In the case of end-to-end testing, done on the REST API level, tests amount to sending a JSON-encoded request to the system and comparing the also-JSON-encoded response to the expected result, according to the [specification](https://github.com/elastic/elasticsearch/tree/master/rest-api-spec). In the case of the Java Unit tests, the internal state of the various objects can be inspected.
+In the case of end-to-end testing, done on the REST API level, tests amount to sending a JSON-encoded request to the system and comparing the also-JSON-encoded response to the expected result, according to the [specification](https://github.com/elastic/elasticsearch/tree/master/rest-api-spec). In the case of the Java Unit tests, the internal state of the various objects can be inspected. The result of the tests is [displayed in the command line](http://build-us-00.elastic.co/job/elastic,painless,master/lastBuild/console).  
 
 <a name="isolateability" />
 Isolateability
@@ -56,7 +56,7 @@ The modules composing Elasticsearch are detailed in the [documentation](https://
 <a name="heterogeneity" />
 Heterogeneity
 -------------
-The differences inherent in Java interfaces and the REST API, mean that the testing to the latter has to be done differently from the rest of the codebase which is tested using JUnit/carrotsearch. In the REST API tests, a JSON request is sent to the system, and the reply, also in JSON, is campared with the expected results. In the other tests, Java methods are invoked and their return values as well the attributes of the various classes are checked.
+The differences inherent in Java interfaces and the REST API mean that the testing to the latter has to be done differently from the rest of the codebase which is tested using JUnit/carrotsearch. In the REST API tests, a JSON request is sent to the system, and the reply, also in JSON, is campared with the expected results. In the other tests, Java methods are invoked and their return values as well the attributes of the various classes are checked.
 
 <a name="statistics" />
 Statistics
@@ -69,7 +69,10 @@ Statistics
 <a name="validation" />
 Validation
 ----------
-The stakeholders, the ones that utilize Elasticsearch, are, in turn, developers themselves, who have chosen it as their search solution over the competion, which includes projects such as [Solr](http://lucene.apache.org/solr/). As is expected from such a knowledgeable and invested userbase, feedback about the status of the project is enormous and typically [comprehensive](https://aphyr.com/posts/317-call-me-maybe-elasticsearch). It can be found on the [Elasticsearch forums](https://discuss.elastic.co/c/elasticsearch), in the [issues section on GitHub](https://github.com/elastic/elasticsearch/issues?utf8=%E2%9C%93&q=) and in various [blogs](http://blog.quarkslab.com/mongodb-vs-elasticsearch-the-quest-of-the-holy-performances.html) and [videos](https://www.elastic.co/videos/just-eat-journey-nosql-elasticsearch) on the Internet.The core team is [always](https://github.com/elastic/elasticsearch/issues/14573) receptive to this feedback, going as far as releasing beta and release candidate versions specifically for the purpose of gathering the communities reactions and criticism, in addition to the already frequent release schedule.
+The stakeholders, the ones that utilize Elasticsearch, are, in turn, developers themselves, who have chosen it as their search solution over the competition, which includes projects such as [Solr](http://lucene.apache.org/solr/) via acceptance testing, that is, each developer assesses the system and its features against their particular use case. 
+As is expected from such a knowledgeable and invested userbase, feedback about the status of the project is enormous and typically [comprehensive](https://aphyr.com/posts/317-call-me-maybe-elasticsearch). It can be found on the [Elasticsearch forums](https://discuss.elastic.co/c/elasticsearch), in the [issues section on GitHub](https://github.com/elastic/elasticsearch/issues?utf8=%E2%9C%93&q=) and in various [blogs](http://blog.quarkslab.com/mongodb-vs-elasticsearch-the-quest-of-the-holy-performances.html) and [videos](https://www.elastic.co/videos/just-eat-journey-nosql-elasticsearch) on the Internet. 
+The core team is [always](https://github.com/elastic/elasticsearch/issues/14573) receptive to this feedback, going as far as releasing beta and release candidate versions specifically for the purpose of gathering the communities reactions and criticism, in addition to the already frequent release schedule. 
+
 
 
 
