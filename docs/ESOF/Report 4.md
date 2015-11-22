@@ -81,4 +81,5 @@ The core team is [always](https://github.com/elastic/elasticsearch/issues/14573)
 Conclusion
 ----------
 All in all, the project does an admirable job of verifying and validating the produced software, through a thorough and continuous testing process and the incessant feedback of its avid community. This success is evident in the continued use of Elasticsearch by highly demanding users such as Netflix and GitHub itself. Areas of future improvement include increasing code coverage, which currently sits around a not-so-respectable 48%, and increasing efforts in documenting and commenting code. 
+
 One way we think this issue could be overcome, or at least not made worse, is by demanding of the contributers to have a big percentage of their new code covered by tests. This will ensure the code coverage percentage would not become to low, even with further contributions.
