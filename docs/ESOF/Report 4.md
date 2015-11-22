@@ -64,13 +64,10 @@ The differences inherent in Java interfaces and the REST API mean that the testi
 <a name="statistics" />
 Statistics
 ----------
-[Unit Tests](http://people.apache.org/~rmuir/es-coverage/unit-tests/)
-
-[Integration Tests](http://people.apache.org/~rmuir/es-coverage/integ-tests/)
-
-[Combined](http://people.apache.org/~rmuir/es-coverage/combined/)
-
-[Jenkins](http://build-us-00.elastic.co/)
+ - [Unit Test Coverage](http://people.apache.org/~rmuir/es-coverage/unit-tests/)
+ - [Integration Test Coverage](http://people.apache.org/~rmuir/es-coverage/integ-tests/)
+ - [Combined Tests Coverage](http://people.apache.org/~rmuir/es-coverage/combined/)
+ - [Jenkins History](http://build-us-00.elastic.co/)
 
 <a name="validation" />
 Validation
