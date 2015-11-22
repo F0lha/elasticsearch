@@ -12,6 +12,7 @@ Elasticsearch is a distributed search engine and data storage system based on Ap
 6. [Understandability](#understandability)
 7. [Heterogeneity](#heterogeneity)
 8. [Validation](#validation)
+9. [Conclusion](#conclusion)
 
 <a name="intro" />
 Introduction
@@ -71,7 +72,12 @@ Statistics
 <a name="validation" />
 Validation
 ----------
-The stakeholders in this case, the ones who have a vested interest in the project, are developers themselves. They have chosen Elasticsearch as their search solution over the competition, which includes projects such as [Solr](http://lucene.apache.org/solr/). This step is not taken lightly in most cases and, via acceptance testing, each developer assesses the system and its features against their particular use case. Oftentimes, this involves inpection of the documentation and other available resources, development of a prototypal system that incorporates Elasticsearch and finally its performance benchmarking. Should the developer find the results satisfying, it is integrated it in their own infrastructure. For subsequent releases, the decision to upgrade is left to each developer, as effort is made to mantain backwards compatibility with these versions.
+The stakeholders in this case, the ones who have a vested interest in the project, are developers themselves. They have chosen Elasticsearch as their search solution over the competition, which includes projects such as [Solr](http://lucene.apache.org/solr/). This step is not taken lightly in most cases and, via acceptance testing, each developer assesses the system and its features against their particular use case. Oftentimes, this involves inpection of the documentation and other available resources, development of a prototypal system that incorporates Elasticsearch and finally its performance benchmarking. Should the developer find the results satisfying, it is integrated it in their own infrastructure. As most developers do not possess intimate familiarity with the innerworkings of the codebase, this testing can typically be categorized as black-box testing. For subsequent releases, the decision to upgrade is left to each developer, as effort is made to mantain backwards compatibility with these versions.
 
 As is expected from such a knowledgeable and invested userbase, feedback about the status of the project is constant and typically [comprehensive](https://aphyr.com/posts/317-call-me-maybe-elasticsearch). It can be found on the [Elasticsearch forums](https://discuss.elastic.co/c/elasticsearch), in the [issues section on GitHub](https://github.com/elastic/elasticsearch/issues?utf8=%E2%9C%93&q=) and in various [blogs](http://blog.quarkslab.com/mongodb-vs-elasticsearch-the-quest-of-the-holy-performances.html) and [videos](https://www.elastic.co/videos/just-eat-journey-nosql-elasticsearch) on the Internet. 
-The core team is [always](https://github.com/elastic/elasticsearch/issues/14573) receptive to this feedback, going as far as releasing beta and release candidate versions specifically for the purpose of gathering the communities reactions and criticism, in addition to their already frequent release schedule. 
+The core team is [always](https://github.com/elastic/elasticsearch/issues/14573) receptive to this feedback, going as far as releasing beta and release candidate versions specifically for the purpose of gathering the communities reactions and criticism, in addition to their already frequent release schedule.´
+
+<a name="conclusion" />
+Conclusion
+----------
+All in all, the project does an admirable job of verifying and validating the produced software, through a thorough and continuous testing process and the incessant feedback of its avid community. This success is evident in the continued use of Elasticsearch by highly demanding users such as Netflix and GitHub itself. Areas of future improvement include increasing code coverage, which currently sits around a not-so-respectable 48%, and increasing efforts in documenting and commenting code.
