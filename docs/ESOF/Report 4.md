@@ -44,7 +44,7 @@ In the case of end-to-end testing, done on the REST API level, tests amount to s
 <a name="isolateability" />
 Isolateability
 --------------
-In addition to unit testing of already isolated components, Elasticsearch's testing suite features various mock objects that allow for the minimization of the effect of other code in the test.
+In addition to unit testing of already isolated components, Elasticsearch's testing suite features various mock objects  such as [MockNode](https://github.com/elastic/elasticsearch/blob/master/test-framework/src/main/java/org/elasticsearch/node/MockNode.java), [MockSearchService](https://github.com/elastic/elasticsearch/blob/master/test-framework/src/main/java/org/elasticsearch/search/MockSearchService.java) that allow for the minimization of the effect of other code in the test.
 
 <a name="separation_of_concerns" />
 Separation of concerns
