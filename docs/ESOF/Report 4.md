@@ -49,7 +49,7 @@ In addition to unit testing of already isolated components, Elasticsearch's test
 <a name="separation_of_concerns" />
 Separation of concerns
 ----------------------
-Functionality is duly separated in classes and methods, as such, tests that verify a certain functionality need only target those classes and methods that implement them.
+Functionality is duly separated in classes and methods, as such, tests that verify a certain functionality need only to target those classes and methods that implement them.
 
 <a name="understandability" />
 Understandability
