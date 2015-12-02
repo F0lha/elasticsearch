@@ -37,6 +37,7 @@ The result, is, as expected:
              ]
           }
        ]
+It is immediately apparent that the term "software" is present in the system, where it would otherwise not be.
 
 The use of an option, turned off by default, means that the changes made do not affect users that are unaware of or opt not to use it. The value of 1 in the *score* field distinctly marks those results that are a consequence of the change, allowing knowing users to use it appropriately and distinguish it from the default behaviour, as this value is impossible to achieve otherwise (being the similarity between the searched term and the options presented, which, by default, are never identical to the term itself).
 
