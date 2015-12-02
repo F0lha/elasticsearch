@@ -5,37 +5,38 @@ The implemented feature responds to a user request made in [issue number 11579](
 Implementation
 --------------
 In order to maintain existing behaviour and avoid unexpected behaviour, the feature, dubbed Exact Matching, was implemented as an option, given in the HTTP request and turned off by default. It was based on existing options present in the Suggest API such as *max_edits* and *prefix_length*. In the example presented in the issue above, it would used as:
-GET /test_es_suggest/_suggest
-{
-  "Suggest": {
-      "term": {
-        "field": "word",
-        "suggest_mode": "popular",
-        "size": 2,
-        "prefix_len": 1,
-        "analyzer": "default",
-        "exact_matching": true
-      },
-      "text": "Software"
+
+    GET /test_es_suggest/_suggest
+    {
+      "Suggest": {
+          "term": {
+            "field": "word",
+            "suggest_mode": "popular",
+            "size": 2,
+            "prefix_len": 1,
+            "analyzer": "default",
+            "exact_matching": true
+          },
+          "text": "Software"
+        }
     }
-}
 
 The result, is, as expected:
 
-"Suggest": [
-      {
-         "text": "software",
-         "offset": 0,
-         "length": 8,
-         "options": [
-            {
-               "text": "software",
-               "score": 1,
-               "freq": 1
-            }
-         ]
-      }
-   ]
+    "Suggest": [
+          {
+             "text": "software",
+             "offset": 0,
+             "length": 8,
+             "options": [
+                {
+                   "text": "software",
+                   "score": 1,
+                   "freq": 1
+                }
+             ]
+          }
+       ]
 
 The use of an option, off by default, means that the changes made do not affect users that are unaware of or opt not to use it. The value of 1 in the *score* field distinctly marks those results that are a consequence of the change, allowing knowing users to use it appropriately and distinguish it from the default behaviour, as this value is impossible to achieve otherwise (being the similarity between the searched term and the options presented, which, by default, are never identical to the term itself).
 
