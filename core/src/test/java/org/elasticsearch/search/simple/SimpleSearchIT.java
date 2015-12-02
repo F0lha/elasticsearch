@@ -107,7 +107,7 @@ public class SimpleSearchIT extends ESIntegTestCase {
         assertHitCount(search, 1l);
     }
 
-    public void testIpCIDR() throws Exception {
+    public void testIpCidr() throws Exception {
         createIndex("test");
 
         client().admin().indices().preparePutMapping("test").setType("type1")
@@ -129,19 +129,14 @@ public class SimpleSearchIT extends ESIntegTestCase {
         assertHitCount(search, 1l);
 
         search = client().prepareSearch()
-                .setQuery(boolQuery().must(QueryBuilders.termQuery("ip", "192.168.0.1/24")))
+                .setQuery(boolQuery().must(QueryBuilders.termQuery("ip", "192.168.0.0/24")))
                 .execute().actionGet();
         assertHitCount(search, 3l);
 
         search = client().prepareSearch()
-                .setQuery(boolQuery().must(QueryBuilders.termQuery("ip", "192.168.0.1/8")))
+                .setQuery(boolQuery().must(QueryBuilders.termQuery("ip", "192.0.0.0/8")))
                 .execute().actionGet();
         assertHitCount(search, 4l);
-
-        search = client().prepareSearch()
-                .setQuery(boolQuery().must(QueryBuilders.termQuery("ip", "192.168.1.1/24")))
-                .execute().actionGet();
-        assertHitCount(search, 1l);
 
         search = client().prepareSearch()
                 .setQuery(boolQuery().must(QueryBuilders.termQuery("ip", "0.0.0.0/0")))
@@ -155,7 +150,7 @@ public class SimpleSearchIT extends ESIntegTestCase {
 
         assertFailures(client().prepareSearch().setQuery(boolQuery().must(QueryBuilders.termQuery("ip", "0/0/0/0/0"))),
                 RestStatus.BAD_REQUEST,
-                containsString("not a valid ip address"));
+                containsString("invalid IPv4/CIDR; expected [a.b.c.d, e] but was [[0, 0, 0, 0, 0]]"));
     }
 
     public void testSimpleId() {
@@ -338,9 +333,9 @@ public class SimpleSearchIT extends ESIntegTestCase {
     }
 
     public void testQueryNumericFieldWithRegex() throws Exception {
-        createIndex("idx");
-        indexRandom(true, client().prepareIndex("idx", "type").setSource("num", 34));
-        
+        assertAcked(prepareCreate("idx").addMapping("type", "num", "type=integer"));
+        ensureGreen("idx");
+
         try {
             client().prepareSearch("idx").setQuery(QueryBuilders.regexpQuery("num", "34")).get();
             fail("SearchPhaseExecutionException should have been thrown");

@@ -56,6 +56,7 @@ import org.elasticsearch.index.shard.IndexEventListener;
 import org.elasticsearch.index.shard.IndexShard;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.index.store.IndexStoreConfig;
+import org.elasticsearch.indices.mapper.MapperRegistry;
 import org.elasticsearch.indices.query.IndicesQueriesRegistry;
 import org.elasticsearch.node.settings.NodeSettingsService;
 import org.elasticsearch.plugins.PluginsService;
@@ -91,13 +92,17 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
     private final Map<Index, List<PendingDelete>> pendingDeletes = new HashMap<>();
     private final OldShardsStats oldShardsStats = new OldShardsStats();
     private final IndexStoreConfig indexStoreConfig;
+    private final MapperRegistry mapperRegistry;
 
     @Override
     protected void doStart() {
     }
 
     @Inject
-    public IndicesService(Settings settings, PluginsService pluginsService, NodeEnvironment nodeEnv, NodeSettingsService nodeSettingsService, AnalysisRegistry analysisRegistry, IndicesQueriesRegistry indicesQueriesRegistry, IndexNameExpressionResolver indexNameExpressionResolver, ClusterService clusterService) {
+    public IndicesService(Settings settings, PluginsService pluginsService, NodeEnvironment nodeEnv,
+            NodeSettingsService nodeSettingsService, AnalysisRegistry analysisRegistry,
+            IndicesQueriesRegistry indicesQueriesRegistry, IndexNameExpressionResolver indexNameExpressionResolver,
+            ClusterService clusterService, MapperRegistry mapperRegistry) {
         super(settings);
         this.pluginsService = pluginsService;
         this.nodeEnv = nodeEnv;
@@ -107,6 +112,7 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
         this.indicesQueriesRegistry = indicesQueriesRegistry;
         this.clusterService = clusterService;
         this.indexNameExpressionResolver = indexNameExpressionResolver;
+        this.mapperRegistry = mapperRegistry;
         nodeSettingsService.addListener(indexStoreConfig);
     }
 
@@ -258,7 +264,7 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
         }
         final String indexName = indexMetaData.getIndex();
         final Predicate<String> indexNameMatcher = (indexExpression) -> indexNameExpressionResolver.matchesIndex(indexName, indexExpression, clusterService.state());
-        final IndexSettings idxSettings = new IndexSettings(indexMetaData, this.settings, Collections.EMPTY_LIST, indexNameMatcher);
+        final IndexSettings idxSettings = new IndexSettings(indexMetaData, this.settings, Collections.emptyList(), indexNameMatcher);
         Index index = new Index(indexMetaData.getIndex());
         if (indices.containsKey(index.name())) {
             throw new IndexAlreadyExistsException(index);
@@ -277,7 +283,7 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
         indexModule.addIndexEventListener(oldShardsStats);
         final IndexEventListener listener = indexModule.freeze();
         listener.beforeIndexCreated(index, idxSettings.getSettings());
-        final IndexService indexService = indexModule.newIndexService(nodeEnv, this, nodeServicesProvider);
+        final IndexService indexService = indexModule.newIndexService(nodeEnv, this, nodeServicesProvider, mapperRegistry);
         boolean success = false;
         try {
             assert indexService.getIndexEventListener() == listener;
@@ -556,7 +562,7 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService> i
         // play safe here and make sure that we take node level settings into account.
         // we might run on nodes where we use shard FS and then in the future don't delete
         // actual content.
-        return new IndexSettings(metaData, settings, Collections.EMPTY_LIST);
+        return new IndexSettings(metaData, settings, Collections.emptyList());
     }
 
     /**
