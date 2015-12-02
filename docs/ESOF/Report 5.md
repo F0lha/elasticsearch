@@ -38,7 +38,7 @@ The result, is, as expected:
           }
        ]
 
-The use of an option, off by default, means that the changes made do not affect users that are unaware of or opt not to use it. The value of 1 in the *score* field distinctly marks those results that are a consequence of the change, allowing knowing users to use it appropriately and distinguish it from the default behaviour, as this value is impossible to achieve otherwise (being the similarity between the searched term and the options presented, which, by default, are never identical to the term itself).
+The use of an option, turned off by default, means that the changes made do not affect users that are unaware of or opt not to use it. The value of 1 in the *score* field distinctly marks those results that are a consequence of the change, allowing knowing users to use it appropriately and distinguish it from the default behaviour, as this value is impossible to achieve otherwise (being the similarity between the searched term and the options presented, which, by default, are never identical to the term itself).
 
 For the Exact Matching itself, methods and classes from the Lucene library were primarily used.
 
