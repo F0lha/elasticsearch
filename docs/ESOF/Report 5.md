@@ -4,7 +4,7 @@ The implemented feature responds to a user request made in [issue number 11579](
 
 Implementation
 --------------
-In order to maintain existing functionality and avoid unexpected behaviour, the feature, dubbed Exact Matching, was implemented as an option, given in the HTTP request and turned off by default. It was based on existing options present in the Suggest API such as *max_edits* and *prefix_length*. In the example presented in the issue above, it would used as:
+In order to maintain the existing functionality and avoid unexpected behaviour, the feature, dubbed Exact Matching, was implemented as an option, given in the HTTP request and turned off by default. It was based on existing options present in the Suggest API such as *max_edits* and *prefix_length*. In the example presented in the issue above, it would used as:
 
     GET /test_es_suggest/_suggest
     {
