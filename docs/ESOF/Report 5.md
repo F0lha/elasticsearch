@@ -4,7 +4,7 @@ The implemented feature responds to a user request made in [issue number 11579](
 
 Implementation
 --------------
-In order to maintain the existing functionality and avoid unexpected behaviour, the feature, dubbed Exact Matching, was implemented as an option, given in the HTTP request and turned off by default. It was based on existing options present in the Suggest API such as *max_edits* and *prefix_length*. In the example presented in the issue above, it would used as:
+In order to maintain the existing functionality and avoid unexpected behaviour, the feature, dubbed Exact Matching, was implemented as an option, given in the HTTP request and turned off by default. It was based on existing options present in the Suggest API such as *max_edits* and *prefix_length*. In the example presented in the issue above, it would be used as:
 
     GET /test_es_suggest/_suggest
     {
@@ -39,10 +39,10 @@ The result, is, as expected:
        ]
 It is immediately apparent that the term "software" is present in the system, where it would otherwise not be.
 
-The use of an option, turned off by default, means that the changes made do not affect users that are unaware of or opt not to use it. The value of 1 in the *score* field distinctly marks those results that are a consequence of the change, allowing knowing users to use it appropriately and distinguish it from the default behaviour, as this value is impossible to achieve otherwise (being the similarity between the searched term and the options presented, which, by default, are never identical to the term itself).
+The fact that it is an option means that the changes made do not affect users that are unaware of or opt not to use it. The value of 1 in the *score* field distinctly marks those results that are a consequence of the change, allowing knowing users to use it appropriately and distinguish it from the default behaviour, as this value is impossible to achieve otherwise (as it is the similarity between the searched term and the options presented, which, by default, are never identical to the term itself).
 
-For the Exact Matching itself, methods and classes from the Lucene library were primarily used.
+For the Exact Matching function, methods and classes from the Lucene library were primarily used.
 
-An effort was made to retain the style of the existing codebase and the larger block of code was refactored and incapsulated in its own method so as to preserve the size and struture of the method in which the changes were originally made.
+An effort was made to retain the style of the existing codebase and the larger block of code was refactored and encapsulated in its own method so as to preserve the size and struture of the method in which the changes were originally made.
 
 Edited files: TermSuggester.java, SuggestUtils.java, TermSuggestionBuilder.java, DirectSpellCheckerSettings.java
