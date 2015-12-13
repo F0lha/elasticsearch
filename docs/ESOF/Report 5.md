@@ -4,6 +4,8 @@ The implemented feature responds to a user request made in [issue number 11579](
 
 Implementation
 --------------
+The areas of code to alter were identified using the GitHub search tool (which, incidentally, uses Elasticsearch) and informal code inspection.
+
 In order to maintain the existing functionality and avoid unexpected behaviour, the feature, dubbed Exact Matching, was implemented as an option, given in the HTTP request and turned off by default. It was based on existing options present in the Suggest API such as *max_edits* and *prefix_length*. In the example presented in the issue above, it would be used as:
 
     GET /test_es_suggest/_suggest
@@ -44,5 +46,7 @@ The fact that it is an option means that the changes made do not affect users th
 For the Exact Matching function, methods and classes from the Lucene library were primarily used.
 
 An effort was made to retain the style of the existing codebase and the larger block of code was refactored and encapsulated in its own method so as to preserve the size and struture of the method in which the changes were originally made.
+
+The suggest term documentation was updated to reflect the addition in the API.
 
 Edited files: TermSuggester.java, SuggestUtils.java, TermSuggestionBuilder.java, DirectSpellCheckerSettings.java
