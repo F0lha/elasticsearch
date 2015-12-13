@@ -47,6 +47,6 @@ For the Exact Matching function, methods and classes from the Lucene library wer
 
 An effort was made to retain the style of the existing codebase and the larger block of code was refactored and encapsulated in its own method so as to preserve the size and struture of the method in which the changes were originally made.
 
-The suggest term documentation was updated to reflect the addition in the API.
+The term suggest documentation was updated to reflect the addition in the API.
 
 Edited files: TermSuggester.java, SuggestUtils.java, TermSuggestionBuilder.java, DirectSpellCheckerSettings.java
