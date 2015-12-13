@@ -229,7 +229,7 @@ public final class SuggestUtils {
             suggestion.minQueryLength(parser.intValue());
             } else if (parseFieldMatcher.match(fieldName, Fields.MIN_DOC_FREQ)) {
             suggestion.minDocFreq(parser.floatValue());
-            } if (parseFieldMatcher.match(fieldName, Fields.EXACT_MATCH)) {
+            } else if (parseFieldMatcher.match(fieldName, Fields.EXACT_MATCH)) {
                suggestion.exactMatch(parser.booleanValue());
             } else {
                 return false;
