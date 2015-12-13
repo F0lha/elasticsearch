@@ -1,3 +1,4 @@
+[[breaking_20_setting_changes]]
 === Setting changes
 
 ==== Command line flags
@@ -162,8 +163,6 @@ Elasticsearch.  In-memory indices are no longer supported.
 Log messages are now truncated at 10,000 characters. This can be changed in
 the `logging.yml` configuration file with the `file.layout.conversionPattern`
 setting.
-
-Remove mapping.date.round_ceil setting for date math parsing #8889 (issues: #8556, #8598)
 
 ==== Custom config file
 
