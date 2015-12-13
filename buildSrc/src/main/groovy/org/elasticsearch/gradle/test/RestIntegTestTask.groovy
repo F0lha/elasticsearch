@@ -22,6 +22,7 @@ import com.carrotsearch.gradle.junit4.RandomizedTestingTask
 import org.elasticsearch.gradle.BuildPlugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.internal.tasks.options.Option
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.Input
 import org.gradle.util.ConfigureUtil
@@ -57,6 +58,7 @@ class RestIntegTestTask extends RandomizedTestingTask {
             integTest.testClassesDir = test.testClassesDir
             integTest.mustRunAfter(test)
         }
+        integTest.mustRunAfter(project.precommit)
         project.check.dependsOn(integTest)
         RestSpecHack.configureDependencies(project)
         project.afterEvaluate {
@@ -66,7 +68,9 @@ class RestIntegTestTask extends RandomizedTestingTask {
     }
 
     RestIntegTestTask() {
-        project.afterEvaluate {
+        // this must run after all projects have been configured, so we know any project
+        // references can be accessed as a fully configured
+        project.gradle.projectsEvaluated {
             Task test = project.tasks.findByName('test')
             if (test != null) {
                 mustRunAfter(test)
@@ -74,9 +78,17 @@ class RestIntegTestTask extends RandomizedTestingTask {
             ClusterFormationTasks.setup(project, this, clusterConfig)
             configure {
                 parallelism '1'
-                systemProperty 'tests.cluster', "localhost:${clusterConfig.transportPort}"
+                systemProperty 'tests.cluster', "localhost:${clusterConfig.baseTransportPort}"
             }
         }
+    }
+
+    @Option(
+        option = "debug-jvm",
+        description = "Enable debugging configuration, to allow attaching a debugger to elasticsearch."
+    )
+    public void setDebug(boolean enabled) {
+        clusterConfig.debug = enabled;
     }
 
     @Input

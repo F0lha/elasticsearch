@@ -90,5 +90,5 @@ The Deployment Diagram below represents the Deployment View of Elasticsearch:
 <a name="patterns"/>
 Architectural Patterns
 ----------------------
-* Data flow
-* Client Server
+* Data flow - data is transferred throughout the system in JSON format
+* Client Server - clusters and the nodes that compose them play the role of servers in the more traditional client-server architecture

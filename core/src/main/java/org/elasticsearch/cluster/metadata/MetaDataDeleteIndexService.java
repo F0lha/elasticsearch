@@ -70,7 +70,7 @@ public class MetaDataDeleteIndexService extends AbstractComponent {
         Collection<String> indices = Arrays.asList(request.indices);
         final DeleteIndexListener listener = new DeleteIndexListener(userListener);
 
-        clusterService.submitStateUpdateTask("delete-index " + indices, Priority.URGENT, new ClusterStateUpdateTask() {
+        clusterService.submitStateUpdateTask("delete-index " + indices, new ClusterStateUpdateTask(Priority.URGENT) {
 
             @Override
             public TimeValue timeout() {
@@ -136,7 +136,8 @@ public class MetaDataDeleteIndexService extends AbstractComponent {
                 MetaData newMetaData = metaDataBuilder.build();
                 ClusterBlocks blocks = clusterBlocksBuilder.build();
                 RoutingAllocation.Result routingResult = allocationService.reroute(
-                        ClusterState.builder(currentState).routingTable(routingTableBuilder.build()).metaData(newMetaData).build());
+                        ClusterState.builder(currentState).routingTable(routingTableBuilder.build()).metaData(newMetaData).build(),
+                        "deleted indices [" + indices + "]");
                 return ClusterState.builder(currentState).routingResult(routingResult).metaData(newMetaData).blocks(blocks).build();
             }
 

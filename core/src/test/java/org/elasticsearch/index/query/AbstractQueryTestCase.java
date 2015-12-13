@@ -22,6 +22,7 @@ package org.elasticsearch.index.query;
 import com.carrotsearch.randomizedtesting.generators.CodepointSetGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
+
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -56,6 +57,7 @@ import org.elasticsearch.common.io.stream.NamedWriteableAwareStreamInput;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.SettingsFilter;
 import org.elasticsearch.common.settings.SettingsModule;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.*;
@@ -78,6 +80,7 @@ import org.elasticsearch.indices.IndicesWarmer;
 import org.elasticsearch.indices.breaker.CircuitBreakerService;
 import org.elasticsearch.indices.breaker.NoneCircuitBreakerService;
 import org.elasticsearch.indices.fielddata.cache.IndicesFieldDataCache;
+import org.elasticsearch.indices.mapper.MapperRegistry;
 import org.elasticsearch.indices.query.IndicesQueriesRegistry;
 import org.elasticsearch.script.*;
 import org.elasticsearch.script.Script.ScriptParseException;
@@ -128,6 +131,7 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
     private static IndicesQueriesRegistry indicesQueriesRegistry;
     private static QueryShardContext queryShardContext;
     private static IndexFieldDataService indexFieldDataService;
+    private static int queryNameId = 0;
 
 
     protected static QueryShardContext queryShardContext() {
@@ -180,13 +184,14 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
                 clientInvocationHandler);
         injector = new ModulesBuilder().add(
                 new EnvironmentModule(new Environment(settings)),
-                new SettingsModule(settings),
+                new SettingsModule(settings, new SettingsFilter(settings)),
                 new ThreadPoolModule(new ThreadPool(settings)),
                 new IndicesModule() {
                     @Override
                     public void configure() {
                         // skip services
                         bindQueryParsersExtension();
+                        bindMapperExtension();
                     }
                 },
                 new ScriptModule(settings) {
@@ -236,8 +241,9 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
         ).createInjector();
         AnalysisService analysisService = new AnalysisRegistry(null, new Environment(settings)).build(idxSettings);
         ScriptService scriptService = injector.getInstance(ScriptService.class);
-        SimilarityService similarityService = new SimilarityService(idxSettings, Collections.EMPTY_MAP);
-        MapperService mapperService = new MapperService(idxSettings, analysisService, similarityService);
+        SimilarityService similarityService = new SimilarityService(idxSettings, Collections.emptyMap());
+        MapperRegistry mapperRegistry = injector.getInstance(MapperRegistry.class);
+        MapperService mapperService = new MapperService(idxSettings, analysisService, similarityService, mapperRegistry);
         indexFieldDataService = new IndexFieldDataService(idxSettings, injector.getInstance(IndicesFieldDataCache.class), injector.getInstance(CircuitBreakerService.class), mapperService);
         BitsetFilterCache bitsetFilterCache = new BitsetFilterCache(idxSettings, new IndicesWarmer(idxSettings.getNodeSettings(), null), new BitsetFilterCache.Listener() {
             @Override
@@ -316,10 +322,19 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
                 query.boost(2.0f / randomIntBetween(1, 20));
             }
             if (randomBoolean()) {
-                query.queryName(randomAsciiOfLengthBetween(1, 10));
+                query.queryName(createUniqueRandomName());
             }
         }
         return query;
+    }
+
+    /**
+     * make sure query names are unique by suffixing them with increasing counter
+     */
+    private static String createUniqueRandomName() {
+        String queryName = randomAsciiOfLengthBetween(1, 10) + queryNameId;
+        queryNameId++;
+        return queryName;
     }
 
     /**
@@ -338,7 +353,7 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
             assertParsedQuery(builder.bytes(), testQuery);
             for (Map.Entry<String, QB> alternateVersion : getAlternateVersions().entrySet()) {
                 String queryAsString = alternateVersion.getKey();
-                assertParsedQuery(new BytesArray(queryAsString), alternateVersion.getValue());
+                assertParsedQuery(new BytesArray(queryAsString), alternateVersion.getValue(), ParseFieldMatcher.EMPTY);
             }
         }
     }
@@ -626,7 +641,6 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
                 secondQuery.boost(firstQuery.boost() + 1f + randomFloat());
             }
             assertThat("different queries should not be equal", secondQuery, not(equalTo(firstQuery)));
-            assertThat("different queries should have different hashcode", secondQuery.hashCode(), not(equalTo(firstQuery.hashCode())));
         }
     }
 
@@ -858,4 +872,54 @@ public abstract class AbstractQueryTestCase<QB extends AbstractQueryBuilder<QB>>
         throw new UnsupportedOperationException("this test can't handle MultiTermVector requests");
     }
 
+    /**
+     * Call this method to check a valid json string representing the query under test against
+     * it's generated json.
+     *
+     * Note: By the time of this writing (Nov 2015) all queries are taken from the query dsl
+     * reference docs mirroring examples there. Here's how the queries were generated:
+     *
+     * <ul>
+     * <li> Take a reference documentation example.
+     * <li> Stick it into the createParseableQueryJson method of the respective query test.
+     * <li> Manually check that what the QueryBuilder generates equals the input json ignoring default options.
+     * <li> Put the manual checks into the asserQueryParsedFromJson method.
+     * <li> Now copy the generated json including default options into createParseableQueryJso
+     * <li> By now the roundtrip check for the json should be happy.
+     * </ul>
+     **/
+    public static void checkGeneratedJson(String expected, QueryBuilder<?> source) throws IOException {
+        // now assert that we actually generate the same JSON
+        XContentBuilder builder = XContentFactory.jsonBuilder().prettyPrint();
+        source.toXContent(builder, ToXContent.EMPTY_PARAMS);
+        assertEquals(
+                msg(expected, builder.string()),
+                expected.replaceAll("\\s+",""),
+                builder.string().replaceAll("\\s+",""));
+    }
+
+    private static String msg(String left, String right) {
+        int size = Math.min(left.length(), right.length());
+        StringBuilder builder = new StringBuilder("size: " + left.length() + " vs. " + right.length());
+        builder.append(" content: <<");
+        for (int i = 0; i < size; i++) {
+            if (left.charAt(i) == right.charAt(i)) {
+                builder.append(left.charAt(i));
+            } else {
+                builder.append(">> ").append("until offset: ").append(i)
+                        .append(" [").append(left.charAt(i)).append(" vs.").append(right.charAt(i))
+                        .append("] [").append((int)left.charAt(i) ).append(" vs.").append((int)right.charAt(i)).append(']');
+                return builder.toString();
+            }
+        }
+        if (left.length() != right.length()) {
+            int leftEnd = Math.max(size, left.length()) - 1;
+            int rightEnd = Math.max(size, right.length()) - 1;
+            builder.append(">> ").append("until offset: ").append(size)
+                    .append(" [").append(left.charAt(leftEnd)).append(" vs.").append(right.charAt(rightEnd))
+                    .append("] [").append((int)left.charAt(leftEnd)).append(" vs.").append((int)right.charAt(rightEnd)).append(']');
+            return builder.toString();
+        }
+        return "";
+    }
 }
