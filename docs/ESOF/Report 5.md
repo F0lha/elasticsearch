@@ -50,3 +50,5 @@ An effort was made to retain the style of the existing codebase and the larger b
 The term suggest documentation was updated to reflect the addition in the API.
 
 Edited files: TermSuggester.java, SuggestUtils.java, TermSuggestionBuilder.java, DirectSpellCheckerSettings.java
+
+[Pull Request](https://github.com/elastic/elasticsearch/pull/15410)
