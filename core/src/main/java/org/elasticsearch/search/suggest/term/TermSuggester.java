@@ -56,7 +56,10 @@ public final class TermSuggester extends Suggester<TermSuggestionContext> {
             );
             Text key = new BytesText(new BytesArray(token.term.bytes()));
             TermSuggestion.Entry resultEntry = new TermSuggestion.Entry(key, token.startOffset, token.endOffset - token.startOffset);
-            for (SuggestWord suggestWord : suggestedWords) {
+            if(suggestion.getDirectSpellCheckerSettings().exactMatch()){
+                addExactMatch( suggestion,  indexReader,  token, resultEntry);
+            }
+			for (SuggestWord suggestWord : suggestedWords) {
                 Text word = new StringText(suggestWord.string);
                 resultEntry.addOption(new TermSuggestion.Entry.Option(word, suggestWord.freq, suggestWord.score));
             }
@@ -69,8 +72,38 @@ public final class TermSuggester extends Suggester<TermSuggestionContext> {
     public SuggestContextParser getContextParser() {
         return new TermSuggestParser(this);
     }
-
-
+	
+	private void addExactMatch(TermSuggestionContext suggestion, IndexReader indexReader, Token token, TermSuggestion.Entry resultEntry) throws IOException{
+        //If token is spelled correctly, add to results with a score of 1
+        Terms terms = MultiFields.getTerms(indexReader, token.term.field());
+        TermsEnum e = terms.iterator();
+        CharsRefBuilder crb = new CharsRefBuilder();
+        BytesRef candidateTerm;
+        String termAsString;
+        //token that will be compared
+        String tokenAsString = token.term.text();
+        boolean foundToken = false;
+        //iterate through terms in index
+        while ((candidateTerm = e.next()) != null && !foundToken) {
+            crb.copyUTF8Bytes(candidateTerm);
+            //get the term
+            termAsString = crb.toString();
+            //exact match found
+            if(termAsString.equals(tokenAsString)){
+                SuggestWord exactMatch = new SuggestWord();
+                exactMatch.string = termAsString;
+                //as it is an exact match its score is 1, differentiating it from suggestions
+                exactMatch.score = 1;
+                exactMatch.freq = e.docFreq();
+                //we found it
+                foundToken = true;
+                //add to results
+                Text word = new StringText(exactMatch.string);
+                resultEntry.addOption(new TermSuggestion.Entry.Option(word, exactMatch.freq, exactMatch.score));
+            }
+        }
+    }
+	
     private List<Token> queryTerms(SuggestionContext suggestion, CharsRefBuilder spare) throws IOException {
         final List<Token> result = new ArrayList<>();
         final String field = suggestion.getField();
