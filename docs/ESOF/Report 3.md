@@ -74,18 +74,23 @@ The Activity Diagram below represents the Process View of Elasticsearch:
     </span>
 </p>
 <a name="deployment"/>
+The most important process taking place in the system, taking into account how often it is executed, is that of receiving, processing and executing a query. A request is made to a node belonging to a cluster, usually through HTTP. In the search phase, this coordinating node transmits a request to the other nodes in the cluster so that each shard in the index is searched (whether it be in a replica or the primary shard itself). Each node performs the query locally on its own information and returns the results to the coordinating node, in the fetch phase. It then assembles all the results into a single response which it returns to the machine tha made the original request.
+
 Deployment view
 ---------------
 The Deployment View depicts the system from a system engineer's point of view. It is concerned with the topology of software components on the physical layer, as well as the physical connections between these components. The UML Diagram used to represent this view is the Deployment Diagram.
 
 A Deployment Diagram in the Unified Modeling Language models the physical deployment of artifacts on nodes. The nodes appear as boxes, and the artifacts allocated to each node appear as rectangles within the boxes. Nodes may have subnodes, which appear as nested boxes. A single node in a deployment diagram may conceptually represent multiple physical nodes, such as a cluster of database servers.
 The Deployment Diagram below represents the Deployment View of Elasticsearch:
+
 <p align="center">
   <img src="images/deployment.PNG">
   <span class="caption">
       <p align="center">Deployment Diagram</p>
   </span>
 </p>
+
+Elasticsearch runs on a set of computers, the nodes, which together form a cluster. A separate application sends requests to the cluster via HTTP. Each instance of elasticsearch performs the search using the Lucene library.
 
 <a name="patterns"/>
 Architectural Patterns
