@@ -52,3 +52,5 @@ The term suggest documentation was updated to reflect the addition in the API.
 Edited files: TermSuggester.java, SuggestUtils.java, TermSuggestionBuilder.java, DirectSpellCheckerSettings.java
 
 [Pull Request](https://github.com/elastic/elasticsearch/pull/15410)
+
+Since the submission of the pull request, members of the core team gave feedback regarding the changes made, suggesting a refactoring of the code in addition to a test to the functionality added. The changes suggested have been incorporated into the pull request.
