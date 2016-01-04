@@ -32,7 +32,7 @@ Elasticsearch uses Lucene as a search server.
 REST API
 --------
 REST (REpresentational State Transfer) is an architectural style, and an approach to communications that is often used in the development of Web services.
-REST'S decoupled architecture, and lighter weight communications between producer and consumer, make REST a popular building style for cloud-based APIs. When Web services use REST architecture, they are called RESTful APIs (Application Programming Interfaces) or REST APIs. Elasticsearch is a RESTful API.
+REST'S decoupled architecture, and lighter weight communications between producer and consumer, make REST a popular building style for cloud-based APIs. When Web services use REST architecture, they are called RESTful APIs (Application Programming Interfaces) or REST APIs. Elasticsearch supplies a RESTful API, and it constitutes its primary mode of use.
 
 <a name="implementation" />
 Implementation View
@@ -47,6 +47,8 @@ The Component Diagram below represents the Implementation View of Elasticsearch:
       <p align="center">Component Diagram</p>
     </span>
 </p>
+The Lucene library constitutes the component that actually performs search on the documents. The component named Elasticsearch system is tasked with communicating between nodes and managing the cluster. The REST API receives requests and output responses. The entire system, in turn, can form a component implementing data management and analysis for other applications that use it.
+
 <a name="logical"/>
 Logical View
 ------------
